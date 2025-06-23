@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import Mapping
 
-from root import APP_ROOT, SAMPLING_PLUGIN_CONFIG_DIRECTORY
+import root
 from sampling.sampler import Sampler
 
 from sampling_libs.ranges import BoundTranslator
@@ -12,7 +12,10 @@ from .order import Order
 from .order_factory import OrderFactory
 
 
-CONFIG_FILE = SAMPLING_PLUGIN_CONFIG_DIRECTORY / "order_sampling.ini"
+CONFIG_FILE = root.get_config_path(
+    root.ConfigPath.SAMPLING_PLUGINS
+) / "order_sampling.ini"
+APP_ROOT = root.get_app_root()
 
 
 class OrderSampler(Sampler):

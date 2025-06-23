@@ -1,7 +1,6 @@
 import importlib
 from output.events import Event, event_bus
 import pkgutil
-from root import SOURCE_ROOT
 from sampling import Sampler, SampleGroup
 import sys
 

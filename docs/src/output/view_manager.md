@@ -7,10 +7,10 @@ The view_manager module enables views when its enable_view function is called.
 ## Example
 ```
 >>> # This is typically done in a controller.
->>> from output.views import View
+>>> from output.views import ViewType
 >>> from output import view_manager
 >>> 
->>> wanted_views = [View.CONSOLE]
+>>> wanted_views = [ViewType.CONSOLE]
 >>> 
 >>> view_manager.enable_views(wanted_views)
 >>> 

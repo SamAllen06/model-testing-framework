@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from configparser import ConfigParser
 import csv
 from pathlib import Path
@@ -5,126 +6,136 @@ import shutil
 
 from output.events import Event
 from output.file_utils import FileSystemTree
-from root import APP_ROOT, OUTPUT_CONFIG_DIRECTORY
-
-CONFIG_FILE = OUTPUT_CONFIG_DIRECTORY / "files.ini"
-
-CONFIG = ConfigParser()
-CONFIG.read(CONFIG_FILE)
-
-SAMPLES_DIRECTORY = APP_ROOT / CONFIG["Directories"]["samples"]
-ERRORS_DIRECTORY = APP_ROOT / CONFIG["Directories"]["errors"]
-SAMPLE_ANALYSIS_DIRECTORY = APP_ROOT / CONFIG["Directories"]["analysis"] / "sample"
-GROUP_ANALYSIS_DIRECTORY = APP_ROOT / CONFIG["Directories"]["analysis"] / "group"
-
-BINARY_EXIT_FILE_HEADERS = ("sample_index", "exit_code")
-
-_parameter_order: list[str] = []
-
-_current_group: str
-_current_sample: int
+from output.views.view import View
+import root
 
 
-def _prepare_directory(directory: Path) -> None:
-    directory.mkdir(parents=True, exist_ok=True)
-    for child in directory.iterdir():
-        if child.is_file():
-            child.unlink()
-        else:
-            shutil.rmtree(child)
+class FileView(View):
+    _BINARY_EXIT_FILE_HEADERS = ("sample_index", "exit_code")
+
+    def __init__(self) -> None:
+        self._read_config()
+
+        self._parameter_order: list[str] = []
+
+        self._current_group: str
+        self._current_sample: int
 
 
-def _on_initialize() -> None:
-    directories = [
-        SAMPLES_DIRECTORY,
-        ERRORS_DIRECTORY,
-        SAMPLE_ANALYSIS_DIRECTORY,
-        GROUP_ANALYSIS_DIRECTORY,
-    ]
+    def _read_config(self) -> None:
+        config_path = root.get_config_path(root.ConfigPath.OUTPUT) / "files.ini"
 
-    for directory in directories:
-        _prepare_directory(directory)
+        config = ConfigParser()
+        config.read(config_path)
+
+        output_root = root.get_app_root() / "testing_output"
+
+        self._samples_directory = output_root / config["Directories"]["samples"]
+        self._errors_directory = output_root / config["Directories"]["errors"]
+        self._sample_analysis_directory = (
+                output_root / config["Directories"]["analysis"] / "sample"
+        )
+        self._group_analysis_directory = (
+                output_root / config["Directories"]["analysis"] / "group"
+        )
 
 
-def _on_began_sampling_from_group(group_name: str) -> None:
-    global _current_group
-    _current_group = group_name
 
+    def _get_event_subscriptions(self) -> dict[Event, Callable[..., None]]:
+        return {
+            Event.INITIALIZE: self._on_initialize,
+            Event.BEGAN_SAMPLING_FROM_GROUP: self._on_began_sampling_from_group,
+            Event.SAMPLE_GENERATED: self._on_sample_generated,
+            Event.BINARY_EXITED: self._on_binary_exited,
+            Event.SAMPLE_ANALYSIS_WITH_PLUGIN_SUCCESS:
+                self._on_sample_analysis_with_plugin_success,
+            Event.GROUP_ANALYSIS_WITH_PLUGIN_SUCCESS:
+                self._on_group_analysis_with_plugin_success,
+        }
 
-def _on_sample_generated(sample_index: int, values: dict[str, float]) -> None:
-    global _current_sample
-    _current_sample = sample_index
+    def _prepare_directory(self, directory: Path) -> None:
+        directory.mkdir(parents=True, exist_ok=True)
+        for child in directory.iterdir():
+            if child.is_file():
+                child.unlink()
+            else:
+                shutil.rmtree(child)
 
-    global _current_group
+    def _on_initialize(self) -> None:
+        directories = [
+            self._samples_directory,
+            self._errors_directory,
+            self._sample_analysis_directory,
+            self._group_analysis_directory,
+        ]
 
-    global _parameter_order
-    if not _parameter_order:
-        _parameter_order = list(values.keys())
+        for directory in directories:
+            self._prepare_directory(directory)
 
-    sample_group_file = SAMPLES_DIRECTORY / f"{_current_group}.csv"
-    is_first_write = not sample_group_file.exists()
+    def _on_began_sampling_from_group(
+            self,
+            group_name: str,
+            group_index: int,
+            group_count: int
+    ) -> None:
+        self._current_group = group_name
 
-    with open(sample_group_file, "a", newline="") as file:
-        writer = csv.writer(file)
+    def _on_sample_generated(
+            self,
+            sample_index: int,
+            sample_count: int,
+            values: dict[str, float]
+    ) -> None:
+        self._current_sample = sample_index
+
+        if not self._parameter_order:
+            self._parameter_order = list(values.keys())
+
+        sample_group_file = self._samples_directory / f"{self._current_group}.csv"
+        is_first_write = not sample_group_file.exists()
+
+        with open(sample_group_file, "a", newline="") as file:
+            writer = csv.writer(file)
+            
+            if is_first_write:
+                writer.writerow(self._parameter_order)
+
+            sample_row = [values[parameter] for parameter in self._parameter_order]
+            writer.writerow(sample_row)
+
+    def _on_binary_exited(self, exit_code: int) -> None:
+        if not exit_code:
+            return
         
-        if is_first_write:
-            writer.writerow(_parameter_order)
+        error_file = self._errors_directory / f"{self._current_group}.csv"
+        is_first_write = not error_file.exists()
+        
+        with open(error_file, "a", newline="") as file:
+            writer = csv.writer(file)
 
-        sample_row = [values[parameter] for parameter in _parameter_order]
-        writer.writerow(sample_row)
+            if is_first_write:
+                writer.writerow(self._BINARY_EXIT_FILE_HEADERS)
 
+            writer.writerow((self._current_sample, exit_code))
 
-def _on_binary_exited(exit_code: int) -> None:
-    if not exit_code:
-        return
+    def _on_sample_analysis_with_plugin_success(
+            self,
+            plugin_name: str,
+            file_output: FileSystemTree
+    ) -> None:
+        analysis_tree_parent = self._sample_analysis_directory / self._current_group / plugin_name
 
-    global _current_group
-    global _current_sample
+        analysis_tree_parent.mkdir(exist_ok=True, parents=True)
 
-    error_file = ERRORS_DIRECTORY / f"{_current_group}.csv"
-    is_first_write = not error_file.exists()
-    
-    with open(error_file, "a", newline="") as file:
-        writer = csv.writer(file)
+        file_output.write_to_filesystem(analysis_tree_parent, str(self._current_sample))
 
-        if is_first_write:
-            writer.writerow(BINARY_EXIT_FILE_HEADERS)
+    def _on_group_analysis_with_plugin_success(
+            self,
+            plugin_name: str,
+            file_output: FileSystemTree
+    ) -> None:
+        analysis_tree_parent = self._group_analysis_directory / self._current_group
 
-        writer.writerow((_current_sample, exit_code))
+        analysis_tree_parent.mkdir(exist_ok=True)
 
-
-def _on_sample_analysis_with_plugin_success(
-        plugin_name: str,
-        file_output: FileSystemTree
-) -> None:
-    global _current_group
-    global _current_sample
-
-    analysis_tree_parent = SAMPLE_ANALYSIS_DIRECTORY / _current_group / plugin_name
-
-    analysis_tree_parent.mkdir(exist_ok=True, parents=True)
-
-    file_output.write_to_filesystem(analysis_tree_parent, str(_current_sample))
-
-
-def _on_group_analysis_with_plugin_success(
-        plugin_name: str,
-        file_output: FileSystemTree
-) -> None:
-    global _current_group
-
-    analysis_tree_parent = GROUP_ANALYSIS_DIRECTORY / _current_group
-
-    analysis_tree_parent.mkdir(exist_ok=True)
-
-    file_output.write_to_filesystem(analysis_tree_parent, str(plugin_name))
-
-
-SUBSCRIPTIONS = {
-    Event.INITIALIZE: _on_initialize,
-    Event.BEGAN_SAMPLING_FROM_GROUP: _on_began_sampling_from_group,
-    Event.SAMPLE_GENERATED: _on_sample_generated,
-    Event.BINARY_EXITED: _on_binary_exited,
-    Event.SAMPLE_ANALYSIS_WITH_PLUGIN_SUCCESS: _on_sample_analysis_with_plugin_success,
-    Event.GROUP_ANALYSIS_WITH_PLUGIN_SUCCESS: _on_group_analysis_with_plugin_success,
-}
+        file_output.write_to_filesystem(analysis_tree_parent, str(plugin_name))

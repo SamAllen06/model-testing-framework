@@ -1,12 +1,15 @@
 from configparser import ConfigParser
 
-from root import APP_ROOT, SAMPLING_PLUGIN_CONFIG_DIRECTORY
+import root
 from sampling import Sampler
 
 from sampling_libs.ranges import RangeReader
 from .csv_indices_group import CsvIndicesGroup
 
-CONFIG_FILE = SAMPLING_PLUGIN_CONFIG_DIRECTORY / "csv_index_sampling.ini"
+CONFIG_FILE = root.get_config_path(
+    root.ConfigPath.SAMPLING_PLUGINS
+) / "csv_index_sampling.ini"
+APP_ROOT = root.get_app_root()
 
 
 class CsvIndexSampler(Sampler):

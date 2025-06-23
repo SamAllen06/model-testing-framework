@@ -1,16 +1,19 @@
 from collections.abc import Iterable
-from enum import Enum
 
-from output.events import event_bus
-from output.views import View
+from output.views import ConsoleView, FileView, LogsView, View, ViewType
 
 
-def _enable(view: View) -> None:
-    view_subscriptions = view.value.SUBSCRIPTIONS
-    for event in view_subscriptions:
-        event_bus.subscribe(event, view_subscriptions[event])
+def _view_factory(view_type: ViewType) -> View:
+    match view_type:
+        case ViewType.CONSOLE:
+            return ConsoleView()
+        case ViewType.FILE:
+            return FileView()
+        case ViewType.LOGS:
+            return LogsView()
 
 
-def enable_views(views: Iterable[View]) -> None:
-    for view in views:
-        _enable(view)
+def enable_views(views: Iterable[ViewType]) -> None:
+    for view_type in views:
+        view = _view_factory(view_type)
+        view.subscribe_to_bus()

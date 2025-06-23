@@ -1,19 +1,19 @@
-from collections.abc import Set, Sized
+from collections.abc import Callable, Set, Sized
 import inspect
-from types import GenericAlias, MethodType
+from types import GenericAlias
 from typing import Any
 
 from output.events.event import Event, EVENT_PARAMETERS
 
-subscriptions: dict[Event, list[MethodType]] = {event: [] for event in Event}
+subscriptions: dict[Event, list[Callable[..., None]]] = {event: [] for event in Event}
 
 
-def subscribe(event: Event, callback: MethodType) -> None:
+def subscribe(event: Event, callback: Callable[..., None]) -> None:
     _validate_callback_for_event(callback, event)
     subscriptions[event].append(callback)
 
 
-def unsubscribe(event: Event, callback: MethodType) -> None:
+def unsubscribe(event: Event, callback: Callable[..., None]) -> None:
     subscriptions[event].remove(callback)
 
 
@@ -26,20 +26,30 @@ def fire_event(event: Event, **kwargs) -> None:
 
 
 def get_callback_args_subset(
-        callback: MethodType,
+        callback: Callable[..., None],
         kwargs: dict[str, Any]
 ) -> dict[str, Any]:
     subset: dict[str, Any] = {}
 
     callback_args = inspect.getfullargspec(callback).args
+
+    if "self" in callback_args:
+        callback_args.remove("self")
+
     for callback_arg in callback_args:
         subset[callback_arg] = kwargs[callback_arg]
 
     return subset
 
 
-def _validate_callback_for_event(callback: MethodType, event: Event) -> None:
+def _validate_callback_for_event(callback: Callable[..., None], event: Event) -> None:
     callback_spec = inspect.getfullargspec(callback)
+
+    # Ignore the self argument.
+    if "self" in callback_spec.args:
+        callback_spec.args.remove("self")
+    if "self" in callback_spec.annotations:
+        del callback_spec.annotations["self"]
 
     if callback_spec.varkw:
         return
@@ -133,10 +143,3 @@ def _get_incorrectly_typed_arguments_for_event(
             incorrect_args.append((arg_name, expected_type, arg_type))
 
     return incorrect_args
-
-
-#        raise ValueError(
-#            f"Event argument {event_arg_name} is of type {event_arg_type}, "
-#            f"but callback argument {event_arg_name} expects "
-#            f"type {callback_arg_type}"
-#        )

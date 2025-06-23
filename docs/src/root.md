@@ -2,22 +2,22 @@
 APP/src/root.py
 
 ## Purpose
-The root module stores a number of [pathlib.Path](https://docs.python.org/3.10/library/pathlib.html)
-constants. Paths are used at multiple points in the program, however, letting
-individual modules define the entire path of the files they make use of would be 
-unwise.
+The root module stores a number of [pathlib.Path(s)](https://docs.python.org/3.10/library/pathlib.html)
+computed relative to the configuration directory. Paths are used at multiple
+points in the program, however, letting individual modules define the entire
+path of the files they make use of would be unwise.
 
 There are two types of paths: absolute and relative. Absolute paths are defined
 in relation to the root directory of the system, which is "/" on Unix-like
 systems. Relative paths, however, are defined in relation to some other path.
-Commonly this path is the current working directory, but not always.
+Python defaults to using the current working directory.
 
 For this program, relative paths are the better option for a number of reasons.
-The most important of which is that the program can run inside both a
-developer's computer, as well as inside the docker image.
-However, every relative path must eventually be defined relative to some absolute
-path, so the question then becomes, which path should the various paths in this
-program relative to?
+The most important being that the program can run independent of where it is
+placed or where it is run, meaning it works when testing it in development and
+when it is run inside the Docker image. However, every relative path must
+eventually be defined relative to some absolute path, so the question then
+becomes, which path should the various paths in this program be relative to?
 
 A common answer would be either the current working directory or the file's
 path. However, using the current working directory would cause the paths to
@@ -27,9 +27,10 @@ paths be changed every time a module is moved. Additionally, common directories
 would have to be updated across many different modules, which is highly
 inconvenient.
 
-To prevent this issue, the root module is the only module to reference relative
+To prevent this issue, the `root` module is the only module to reference relative
 paths in relation to its location on the filesystem. All other modules reference
-relative paths in relation to root's constant paths.
+relative paths in relation to paths provided by it. The paths in root can be
+configured in the main configuration file, [main.ini](../config/main.md).
 
 ## Constants
 

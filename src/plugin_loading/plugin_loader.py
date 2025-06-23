@@ -4,7 +4,7 @@ import importlib
 from pathlib import Path
 from typing import Any
 
-from root import SOURCE_ROOT
+import root
 
 
 class PluginLoader(ABC):
@@ -24,7 +24,7 @@ class PluginLoader(ABC):
 
     def load_plugins(self) -> None:
         discovered_plugin_names = self._discover_plugins_in(
-            SOURCE_ROOT / self._plugins_module_name
+            root.get_source_root() / self._plugins_module_name
         )
 
         for plugin_name in discovered_plugin_names:

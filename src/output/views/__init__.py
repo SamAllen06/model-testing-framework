@@ -1,9 +1,5 @@
-from enum import Enum as _Enum
-
-from output.views import console, file, logs
-
-
-class View(_Enum):
-    CONSOLE = console
-    FILE = file
-    LOGS = logs
+from output.views.console import ConsoleView
+from output.views.file import FileView
+from output.views.logs import LogsView
+from output.views.view import View
+from output.views.view_type import ViewType

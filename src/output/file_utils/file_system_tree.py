@@ -30,7 +30,7 @@ class File(FileSystemNode):
 
 
 class Directory(FileSystemNode):
-    def __init__(self):
+    def __init__(self) -> None:
         self._children: dict[str, FileSystemNode] = {}
 
     def write_to_filesystem(self, parent_directory: Path, name: str) -> None:

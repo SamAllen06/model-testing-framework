@@ -3,18 +3,19 @@ from configparser import ConfigParser
 import inspect
 from pathlib import Path
 import sys
-from types import ModuleType
 from typing import Callable
 
 from analysis import PerSampleAnalyzer
 from output.file_utils import FileSystemTree
-from root import ANALYSIS_PLUGIN_CONFIG_DIRECTORY, APP_ROOT
+import root
 from util import ScopedImporter
 
 from . import output
 from .check_status import CheckStatus
 
-_CONFIG_PATH = ANALYSIS_PLUGIN_CONFIG_DIRECTORY / "fault_finding.ini"
+_CONFIG_PATH = root.get_config_path(
+    root.ConfigPath.ANALYSIS_PLUGINS
+) / "fault_finding.ini"
 _CONFIG = ConfigParser()
 _CONFIG.read(_CONFIG_PATH)
 
@@ -73,7 +74,7 @@ class _CheckFunction:
 
 class FaultAnalyzer(PerSampleAnalyzer):
     _CHECK_IDENTIFIER = "check"
-    _CHECKS_PATH = APP_ROOT / _CONFIG["Paths"]["checks_directory"]
+    _CHECKS_PATH = root.get_app_root() / _CONFIG["Paths"]["checks_directory"]
     _PYTHON_EXTENSION = ".py"
 
     _REFERENCE_PARAM_PREFIX = "ref_"
