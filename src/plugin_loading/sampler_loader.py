@@ -1,10 +1,12 @@
 import importlib
+import json
 from output.events import Event, event_bus
 import pkgutil
 from sampling import Sampler, SampleGroup
 import sys
 
 from plugin_loading.plugin_loader import PluginLoader
+import root
 import sampling_plugins
 
 UNIQUE_GROUP_NAME_FORMAT = "{sampler}:{name}"
@@ -12,7 +14,15 @@ UNIQUE_GROUP_NAME_FORMAT = "{sampler}:{name}"
 
 class SamplerLoader(PluginLoader):
     def __init__(self):
-        super().__init__([Sampler], "sampling_plugins", "sampler_class")
+        with open(root.get_config_path(root.ConfigPath.PLUGIN_WHITELIST), "r") as file:
+            whitelist = json.load(file)
+
+        super().__init__(
+            [Sampler],
+            "sampling_plugins",
+            "sampler_class",
+            whitelist["sampling"]
+        )
 
     def sample_from_plugins(self) -> dict[str, SampleGroup]:
         sample_groups: dict[str, SampleGroup] = {}

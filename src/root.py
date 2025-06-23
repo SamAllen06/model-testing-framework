@@ -11,6 +11,7 @@ class ConfigPath(Enum):
     SAMPLING_PLUGINS = auto()
     ANALYSIS_PLUGINS = auto()
     OUTPUT = auto()
+    PLUGIN_WHITELIST = auto()
 
 
 class PluginPath(Enum):
@@ -63,6 +64,8 @@ def get_config_path(path_type: ConfigPath) -> Path:
             return _config_root / "analysis_plugins"
         case ConfigPath.OUTPUT:
             return _config_root / "output"
+        case ConfigPath.PLUGIN_WHITELIST:
+            return _config_root / "plugin_whitelist.json"
 
     raise TypeError("path_type must be a ConfigPath")
 

@@ -1,21 +1,27 @@
 from collections.abc import Mapping, Sequence
 import importlib
+import json
 from output.events import Event, event_bus
 import pkgutil
 import sys
 
 from analysis import PerSampleAnalyzer, SampleGroupAnalyzer
 from plugin_loading.plugin_loader import PluginLoader
+import root
 from sampling import SampleGroup
 from util import Table
 
 
 class AnalyzerLoader(PluginLoader):
     def __init__(self):
+        with open(root.get_config_path(root.ConfigPath.PLUGIN_WHITELIST), "r") as file:
+            whitelist = json.load(file)
+
         super().__init__(
             [PerSampleAnalyzer, SampleGroupAnalyzer],
             "analysis_plugins",
-            "analyzer_class"
+            "analyzer_class",
+            whitelist["analysis"]
         )
 
     def any_sample_plugins_loaded(self) -> bool:

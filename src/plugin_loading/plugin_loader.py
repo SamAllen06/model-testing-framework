@@ -8,19 +8,19 @@ import root
 
 
 class PluginLoader(ABC):
-    _WHITELIST_FILE = "whitelist"
-
     def __init__(
             self,
             acceptable_plugin_classes: Sequence[type],
             plugins_module_name: str,
-            plugin_class_attribute: str
+            plugin_class_attribute: str,
+            whitelisted_plugins: Sequence[str]
     ):
         self._plugin_objects: dict[type, dict[str, Any]] = {
             plugin_class: {} for plugin_class in acceptable_plugin_classes
         }
         self._plugins_module_name = plugins_module_name
         self._plugin_class_attribute = plugin_class_attribute
+        self._whitelisted_plugins = set(whitelisted_plugins)
 
     def load_plugins(self) -> None:
         discovered_plugin_names = self._discover_plugins_in(
@@ -73,25 +73,7 @@ class PluginLoader(ABC):
                 continue
             plugin_module_names.add(plugin_path.stem)
 
-        whitelist_path = path / self._WHITELIST_FILE
-        whitelist_exists = whitelist_path.exists()
-
-        if whitelist_exists:
-            whitelisted_plugins = self._read_whitelist(whitelist_path)
-            return whitelisted_plugins & plugin_module_names
-
-        return plugin_module_names
-
-    def _read_whitelist(self, whitelist_path: Path) -> set[str]:
-        whitelisted_plugins: set[str] = set()
-
-        with open(whitelist_path) as whitelist:
-            lines = whitelist.readlines()
-
-        for line in lines:
-            whitelisted_plugins.add(line.strip())
-
-        return whitelisted_plugins
+        return self._whitelisted_plugins & plugin_module_names
 
     def _generate_plugin_display_name(self, plugin_module_name: str) -> str:
         words = plugin_module_name.split("_")
