@@ -28,7 +28,7 @@ class FileView(View):
         config = ConfigParser()
         config.read(config_path)
 
-        output_root = root.get_app_root() / "testing_output"
+        output_root = root.get_app_root()
 
         self._samples_directory = output_root / config["Directories"]["samples"]
         self._errors_directory = output_root / config["Directories"]["errors"]
