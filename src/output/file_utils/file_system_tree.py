@@ -29,6 +29,17 @@ class File(FileSystemNode):
             shutil.copyfileobj(self._data, file)
 
 
+class TempFileCopy(FileSystemNode):
+    def __init__(self, extension: str, temp_file_path: Path):
+        self._extension = extension
+        self._temp_file_path = temp_file_path
+
+    def write_to_filesystem(self, parent_directory: Path, name: str) -> None:
+        full_path = parent_directory / (name + self._extension)
+        shutil.copy(self._temp_file_path, full_path)
+        self._temp_file_path.unlink()
+
+
 class Directory(FileSystemNode):
     def __init__(self) -> None:
         self._children: dict[str, FileSystemNode] = {}
@@ -101,6 +112,11 @@ class FileSystemTree:
             file_system_tree.add_child(path, file)
 
         return file_system_tree
+
+    @classmethod
+    def create_from_temp_file(cls, extension: str, temp_file_path: Path) -> FileSystemTree:
+        file = TempFileCopy(extension, temp_file_path)
+        return FileSystemTree(file)
 
 
 
