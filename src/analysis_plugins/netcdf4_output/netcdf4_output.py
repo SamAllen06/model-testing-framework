@@ -1,3 +1,4 @@
+from collections.abc import Mapping, MutableSequence, Sequence
 from io import StringIO
 from pathlib import Path
 import tempfile
@@ -37,6 +38,8 @@ class NetCDF4Output(SampleGroupAnalyzer):
         sample_group: SampleGroup,
         data: Table
     ) -> None:
+        filled_samples = sample_group.collapse_and_fill_down()
+
         input_values_set: dict[str, set[float]] = {}
         input_values: dict[str, list[float]] = {}
 
@@ -60,7 +63,11 @@ class NetCDF4Output(SampleGroupAnalyzer):
             input_var = dataset.createVariable(input, "f8", (input,))
             input_var[:] = values
 
-            input_sizes[input] = value_count 
+            input_sizes[input] = value_count
+
+        data_seq = data.as_sequence()
+
+        dataset.createDimension("index", None)
 
         # Any arbitrary order is fine as long as we know what it is.
         input_order = tuple(input_values.keys())
@@ -69,25 +76,36 @@ class NetCDF4Output(SampleGroupAnalyzer):
         # Mapping values to indicies so we can iterate through samples with the output
         # data and quickly convert input values to indicies to store outputs.
         input_value_to_index: dict[str, dict[float, int]] = {}
-        #for input, values in input_values:
-        #    input_value_to_index[input] = {}
-        #    for index, value in enumerate(values):
-        #        input_value_to_index[input][value] = index
-
-        data_seq = data.as_sequence()
+        for input, values in input_values.items():
+            input_value_to_index[input] = {}
+            for index, value in enumerate(values):
+                input_value_to_index[input][value] = index
 
         output_variables = {}
         for output, values in data_seq[0].items():
-            output_variables[output] = dataset.createVariable(output, "f8", input_order)
+            output_variables[output] = dataset.createVariable(
+                output,
+                "f8",
+                input_order + ("index",)
+            )
 
-        #for outputs, sample in zip(data_seq, sample_group):
-        #    for output, values in outputs.items():
-        #        masked_data = np.ma.masked_all(shape, dtype=float)
-        #        indices = (input_value_to_index[input] for input in input_order)
+        for outputs, sample in zip(data_seq, filled_samples):
+            sample_indices = self._convert_sample_to_indices(
+                sample, input_value_to_index, input_order
+            )
 
+            output_data = np.array(outputs[output], dtype="float16")
+            output_variables[output][sample_indices + (slice(0, len(outputs[output])),)] = output_data 
+        import pdb; pdb.set_trace()
             
 
-                
-        
-
-
+    def _convert_sample_to_indices(
+        self,
+        sample: Mapping[str, float],
+        input_value_to_index: dict[str, dict[float, int]],
+        input_order: tuple[str]
+    ) -> tuple[int]:
+        mapped_indices = {
+            input: input_value_to_index[input][value] for input, value in sample.items()
+        }
+        return tuple(mapped_indices[input] for input in input_order)
