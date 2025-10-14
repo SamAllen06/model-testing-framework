@@ -3,7 +3,7 @@ from io import StringIO
 from pathlib import Path
 import tempfile
 
-from netCDF4 import Dataset
+import netCDF4
 import numpy as np
 import numpy.ma as npma
 
@@ -22,7 +22,7 @@ class NetCDF4Output(SampleGroupAnalyzer):
         temp_data_file = tempfile.NamedTemporaryFile(suffix=".nc", delete=False)
 
         try:
-            with Dataset(temp_data_file.name, "w", format="NETCDF4") as dataset:
+            with netCDF4.Dataset(temp_data_file.name, "w", format="NETCDF4") as dataset:
                 self._create_dataset(dataset, sample_group, data)
         finally:
             temp_data_file.close()
@@ -33,7 +33,7 @@ class NetCDF4Output(SampleGroupAnalyzer):
         )
 
     def _create_dataset(
-        self, dataset: Dataset, sample_group: SampleGroup, data: Table
+        self, dataset: netCDF4.Dataset, sample_group: SampleGroup, data: Table
     ) -> None:
         filled_samples = sample_group.collapse_and_fill_down()
 
@@ -54,27 +54,40 @@ class NetCDF4Output(SampleGroupAnalyzer):
 
         dataset.createDimension("index", None)
 
-        output_data = {}
+        output_variables = {}
         for output, values in data_seq[0].items():
+            index_count = len(values)
+            variable = dataset.createVariable(
+                output,
+                "f8",
+                input_order + ("index",),
+                compression="zlib",
+                shuffle=False,
+                complevel=1,
+                # There is probably a better way to pick this chunk size, but this has
+                # worked best in my limited testing.
+                chunksizes=tuple(1 for _ in input_order) + (min(4096, index_count),)
+            )
             shape = inputs_shape + (len(values),)
-            output_data[output] = npma.empty(shape)
-            output_data[output].mask = npma.ones(shape, dtype=bool)
 
-        # A better design would have been to require samples to define a value for each
-        # input variable, not just the ones they are actively changing, but I'm not sure
-        # I'll have time to fix that, so for now it just relies on the first sample
-        # setting a value for all used outputs (which they should).
+            output_variables[output] = variable
+       
+        indices_to_outputs = {}
         for outputs, sample in zip(data_seq, filled_samples):
             sample_indices = self._convert_sample_to_indices(
                 sample, input_value_to_index, input_order
             )
+        
+            indices_to_outputs[sample_indices] = outputs
 
-            for output, values in outputs.items():
-                output_data[output][sample_indices] = values
+        # Sorting by the sample indices
+        write_order = sorted(
+            indices_to_outputs.items(), key=lambda key_value: key_value[0]
+        )
 
-        for output, values in data_seq[0].items():
-            variable = dataset.createVariable(output, "f8", input_order + ("index",))
-            variable[:] = output_data[output]
+        for output, variable in output_variables.items():
+            for input_indices, output_values in write_order:
+                variable[input_indices] = output_values[output]
 
     # Takes a sample group and represents the inputs as values on an axis insead of
     # sequential changes, then returns that representation.
@@ -99,7 +112,7 @@ class NetCDF4Output(SampleGroupAnalyzer):
         return input_values
 
     def _create_input_variables(
-        self, dataset: Dataset, input_values: dict[str, list[float]]
+        self, dataset: netCDF4.Dataset, input_values: dict[str, list[float]]
     ) -> None:
         for input, values in input_values.items():
             dataset.createDimension(input, len(values))
