@@ -1,8 +1,26 @@
+from abc import ABC, abstractmethod
 import copy
+import logging
 from pathlib import Path
 
+import netCDF4
 
-class DefaultsWriter:
+
+logger = logging.getLogger("testing")
+
+
+class DefaultsWriter(ABC):
+    @abstractmethod
+    def write_defaults(self) -> None:
+        pass
+
+
+    @abstractmethod
+    def get_defaults(self) -> None:
+        pass
+
+
+class TextDefaultsWriter(DefaultsWriter):
     def __init__(self, defaults_path: Path, param_path: Path):
         self._defaults = self._read_defaults(defaults_path)
         self._param_path = param_path
@@ -35,3 +53,50 @@ class DefaultsWriter:
 
         return defaults
 
+
+class NetCDFDefaultsWriter(DefaultsWriter):
+    def __init__(self, defaults_path: Path, param_path: Path):
+        self._defaults = self._read_defaults(defaults_path)
+        self._param_path = param_path
+
+    def write_defaults(self) -> None:
+        with netCDF4.Dataset(self._param_path, "r+", format="NETCDF4") as dataset:
+            for name, value in self._defaults.items():
+                dataset.variables[name][0] = value
+
+    def get_defaults(self) -> dict[str, float]:
+        return copy.copy(self._defaults)
+
+    def _read_defaults(self, defaults_path: Path) -> dict[str, float]:
+        defaults = {}
+
+        with netCDF4.Dataset(defaults_path, "r", format="NETCDF4") as dataset:
+            for name, variable in dataset.variables.items():
+                if not variable.shape == tuple():
+                    logger.warning(
+                        f"Non-scalar inputs are not supported ({name})"
+                    )
+                    continue
+
+                defaults[name] = variable[0].item()
+
+        return defaults
+
+
+# Rather than checking extensions, using a file type checker may be better to have in
+# the future.
+def make_defaults_writer(defaults_path: Path, param_path: Path) -> DefaultsWriter:
+    extension = defaults_path.suffix
+
+    if not extension == param_path.suffix:
+        raise ValueError(
+            "Reading from and writing to seperate file types is not supported"
+        )
+
+    match extension:
+        case ".txt":
+            return TextDefaultsWriter(defaults_path, param_path)
+        case ".nc":
+            return NetCDFDefaultsWriter(defaults_path, param_path)
+        case _:
+            raise ValueError(f"'{extension}' is not a supported file type")

@@ -8,7 +8,8 @@ from output.events import Event, event_bus
 from plugin_loading import AnalyzerLoader, SamplerLoader
 import root
 from sampling import SampleGroup
-from testing import BinaryRunner, DefaultsWriter, OutputFileReader, ParamEditor
+from testing import BinaryRunner, OutputFileReader, ParamEditor, make_defaults_writer
+import testing
 
 
 class Tester:
@@ -19,19 +20,24 @@ class Tester:
         config = ConfigParser()
         config.read(config_path)
 
-        self._binary_runner = BinaryRunner()
+        self._binary_runner = testing.BinaryRunner()
         
         self._sampler_loader = SamplerLoader()
         self._analyzer_loader = AnalyzerLoader()
 
-        self._defaults_writer = DefaultsWriter(
+        self._defaults_writer = testing.make_defaults_writer(
             app_root / config["Model"]["parameter_defaults"],
             app_root / config["Model"]["parameters"]
         )
-        self._param_editor = ParamEditor(app_root / config["Model"]["parameters"])
-        self._output_file_reader = OutputFileReader(
+        self._param_editor = testing.make_param_editor(
+            app_root / config["Model"]["parameters"]
+        )
+        self._output_file_reader = testing.make_output_file_reader(
             app_root / config["Model"]["reference_output"],
             app_root / config["Model"]["test_output"]
+        )
+        self._group_data_store = testing.GroupDataStore(
+            self._output_file_reader.get_reference_data()
         )
 
         self._binary_path = app_root / config["Model"]["binary"]
@@ -174,13 +180,13 @@ class Tester:
             self._test_with_sample(sample)
 
         if (not self._analyzer_loader.any_group_plugins_loaded()
-                or not self._output_file_reader.group_data_exists()
+                or not self._group_data_store.group_data_exists()
         ):
             return
 
         event_bus.fire_event(Event.BEGAN_GROUP_ANALYSIS)
 
-        group_data = self._output_file_reader.read_group_data()
+        group_data = self._group_data_store.pop_group_data()
         self._analyzer_loader.run_group_analysis(group, group_data)
 
     def _test_with_sample(self, sample: Mapping[str, float]) -> None:
@@ -197,6 +203,7 @@ class Tester:
 
         reference_data = self._output_file_reader.get_reference_data()
         test_data = self._output_file_reader.read_sample_data()
+        self._group_data_store.store_sample_data(test_data)
 
         if not self._analyzer_loader.any_sample_plugins_loaded():
             return

@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping, MutableSequence, Sequence
 from typing import Any, overload
 
+import numpy as np
+
 from .mixin_sequence_indices import MixinSequenceIndices
 
 
@@ -177,7 +179,10 @@ class TransparentLayerList(MutableSequence, MixinSequenceIndices):
         return len(self._layers) + (1 if self._base_layer is not None else 0)
 
     def _verify_layer_type(self, layer: Any) -> None:
-        if not issubclass(type(layer), Sequence):
+        if (
+            not issubclass(type(layer), Sequence)
+            and not issubclass(type(layer), np.ndarray)
+        ):
             raise TypeError(
                 "TransparentLayerList elements can only be Sequences, not "
                 f"{type(layer)}, add individual elements to a Sequence first"

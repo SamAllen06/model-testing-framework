@@ -1,7 +1,17 @@
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Mapping
 
-class ParamEditor:
+import netCDF4
+
+
+class ParamEditor(ABC):
+    @abstractmethod
+    def modify_parameters(self, value_map: Mapping[str, float]) -> None:
+        pass
+
+
+class TextParamEditor(ParamEditor):
     def __init__(self, file_path: Path):
         self.file_path = file_path
 
@@ -26,3 +36,42 @@ class ParamEditor:
 
         with open(self.file_path, "w") as file:
             file.writelines(lines)
+
+
+class NetCDFParamEditor(ParamEditor):
+    def __init__(self, file_path: Path):
+        self.file_path = file_path
+
+    def modify_parameters(self, value_map: Mapping[str, float]) -> None:
+        with netCDF4.Dataset(self.file_path, "r+", format="NETCDF4") as dataset:
+            found_map = {parameter: False for parameter in value_map.keys()}
+
+            for name, value in value_map.items():
+                if name not in value_map.keys():
+                    continue
+
+                dataset.variables[name][0] = value
+                found_map[name] = True
+                
+            not_found = []
+            for name, found in found_map.items():
+                if not found:
+                    not_found.append(name)
+
+            if not_found:
+                raise KeyError(
+                    f"Could not find parameters \"{not_found}\" "
+                    f"in {self.file_path}."
+                )
+
+
+def make_param_editor(file_path: Path) -> ParamEditor:
+    extension = file_path.suffix
+
+    match extension:
+        case ".txt":
+            return TextParamEditor(file_path)
+        case ".nc":
+            return NetCDFParamEditor(file_path)
+        case _:
+            raise ValueError(f"'{extension}' is not a supported file type")
