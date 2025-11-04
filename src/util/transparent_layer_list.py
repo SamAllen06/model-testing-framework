@@ -21,7 +21,10 @@ class TransparentLayer(Sequence, MixinSequenceIndices):
         self._base_layer = base_layer
         if issubclass(type(comparison_layer), Mapping):
             self._comparison_map = comparison_layer
-        elif issubclass(type(comparison_layer), Sequence):
+        elif (
+            issubclass(type(comparison_layer), Sequence)
+            or issubclass(type(comparison_layer), np.ndarray)
+        ):
             self._comparison_map = self._generate_comparison_map(comparison_layer)
         else:
             raise TypeError("Comparison layer must be a Sequence or Mapping[int, Any]")
@@ -112,7 +115,7 @@ class TransparentLayerList(MutableSequence, MixinSequenceIndices):
         self._layers.insert(index - 1, TransparentLayer(self._base_layer, layer))
 
     def rebase(self, base_layer: Sequence) -> None:
-        base_layer_list = list(base_layer)
+        base_layer_list = base_layer.copy()
 
         for index, layer in enumerate(self._layers):
             self._layers[index] = TransparentLayer(base_layer_list, layer)
