@@ -1,4 +1,5 @@
 from collections.abc import Mapping, MutableSequence, Sequence
+from configparser import ConfigParser
 from io import StringIO
 from pathlib import Path
 import tempfile
@@ -9,8 +10,15 @@ import numpy.ma as npma
 
 from analysis import SampleGroupAnalyzer
 from output.file_utils import FileSystemTree
+import root
 from sampling import SampleGroup
 from util import Table
+
+_CONFIG_PATH = root.get_config_path(
+    root.ConfigPath.ANALYSIS_PLUGINS
+) / "netcdf4_output.ini"
+_CONFIG = ConfigParser()
+_CONFIG.read(_CONFIG_PATH)
 
 
 class NetCDF4Output(SampleGroupAnalyzer):
@@ -23,7 +31,10 @@ class NetCDF4Output(SampleGroupAnalyzer):
 
         try:
             with netCDF4.Dataset(temp_data_file.name, "w", format="NETCDF4") as dataset:
-                self._create_dataset(dataset, sample_group, data)
+                if _CONFIG["Format"].getboolean("store_as_samples"):
+                    self._create_sparse_dataset(dataset, sample_group, data)
+                else:
+                    self._create_dataset(dataset, sample_group, data)
         finally:
             temp_data_file.close()
 
@@ -143,3 +154,42 @@ class NetCDF4Output(SampleGroupAnalyzer):
             input: input_value_to_index[input][value] for input, value in sample.items()
         }
         return tuple(mapped_indices[input] for input in input_order)
+    
+    def _create_sparse_dataset(
+        self, dataset: netCDF4.Dataset, sample_group: SampleGroup, data: Table
+    ) -> None:
+        filled_samples = sample_group.collapse_and_fill_down()
+
+        input_names = [input for input in filled_samples[0].keys()]
+        sample_count = len(filled_samples)
+
+        sample_index_dim = dataset.createDimension("sample_index", sample_count)
+       
+        for input_name in input_names:
+            input_var = dataset.createVariable(
+                input_name,
+                "f8",
+                (sample_index_dim,),
+                compression="zlib",
+                shuffle=False,
+                complevel=1
+            )
+            input_var[:] = [sample[input_name] for sample in filled_samples]
+
+        index_dim = dataset.createDimension("index", None)
+       
+        data_seq = data.as_sequence()
+        data_map = data.as_mapping()
+        output_names = [output for output in data_seq[0].keys()]
+
+        for output_name in output_names:
+            output_var = dataset.createVariable(
+                output_name,
+                "f8",
+                (sample_index_dim, index_dim),
+                compression="zlib",
+                shuffle=True,
+                complevel=3
+            )
+
+            output_var[:] = data_map[output_name][1:]
