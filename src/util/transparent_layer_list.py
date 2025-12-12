@@ -115,7 +115,10 @@ class TransparentLayerList(MutableSequence, MixinSequenceIndices):
         self._layers.insert(index - 1, TransparentLayer(self._base_layer, layer))
 
     def rebase(self, base_layer: Sequence) -> None:
-        base_layer_list = base_layer.copy()
+        if hasattr(base_layer, "copy"):
+            base_layer_list = base_layer.copy()
+        else:
+            base_layer_list = list(base_layer)
 
         for index, layer in enumerate(self._layers):
             self._layers[index] = TransparentLayer(base_layer_list, layer)

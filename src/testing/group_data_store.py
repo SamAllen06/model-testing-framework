@@ -11,6 +11,17 @@ class GroupDataStore:
 
     def store_sample_data(self, data: Mapping[str, Sequence[float]]) -> None: 
         current_group_data_sequence = self._current_group_data.as_sequence()
+
+        # Handles the case where a variable doesn't generate data in the test data but
+        # does in the reference.
+        if not current_group_data_sequence[0].keys() == data.keys():
+            # Handle this using an event or something later.
+            missing_keys = current_group_data_sequence[0].keys() - data.keys()
+            print(f"Test data missing keys: {missing_keys}")
+
+            for key in missing_keys:
+                data[key] = [float("nan")]
+
         current_group_data_sequence.append(data)
 
     def pop_group_data(self) -> Table[dict, TransparentLayerList]:
