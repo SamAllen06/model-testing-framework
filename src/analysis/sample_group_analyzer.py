@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from output.file_utils import FileSystemTree
 from sampling import SampleGroup
-from util import Table
+from testing import ModelData
 
 
 class SampleGroupAnalyzer(ABC):
@@ -10,6 +10,7 @@ class SampleGroupAnalyzer(ABC):
     def analyze_sample_data(
         self,
         sample_group: SampleGroup,
-        data: Table
+        reference_data: ModelData,
+        sample_data: list[ModelData],
     ) -> tuple[str, FileSystemTree]:
         pass

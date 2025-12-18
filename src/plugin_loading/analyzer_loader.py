@@ -9,7 +9,7 @@ from analysis import PerSampleAnalyzer, SampleGroupAnalyzer
 from plugin_loading.plugin_loader import PluginLoader
 import root
 from sampling import SampleGroup
-from util import Table
+from testing import ModelData
 
 
 class AnalyzerLoader(PluginLoader):
@@ -62,7 +62,8 @@ class AnalyzerLoader(PluginLoader):
     def run_group_analysis(
             self,
             sample_group: SampleGroup,
-            data: Table
+            reference_data: ModelData,
+            sample_data: list[ModelData],
     ) -> None:
         for plugin_name, analyzer in self._plugin_objects[SampleGroupAnalyzer].items():
             event_bus.fire_event(
@@ -72,7 +73,7 @@ class AnalyzerLoader(PluginLoader):
 
             try:
                 console_out, file_out = analyzer.analyze_sample_data(
-                    sample_group, data
+                    sample_group, reference_data, sample_data
                 )
                 event_bus.fire_event(
                     Event.GROUP_ANALYSIS_WITH_PLUGIN_SUCCESS,

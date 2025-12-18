@@ -1,1 +1,7 @@
-from output.file_utils.file_system_tree import FileSystemTree
+from output.file_utils.file_system_tree import FileReadType, FileSystemTree
+
+
+__all__ = [
+    "FileReadType",
+    "FileSystemTree",
+]

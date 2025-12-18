@@ -123,7 +123,7 @@ def _generate_file_output(
 
 def _generate_status_file(
         check_results: dict[str, tuple[CheckStatus, None | str | Exception]]
-) -> dict[Path, StringIO]:
+) -> dict[Path, tuple[FileReadType, list[StringIO]]]:
     statuses_table: Table[dict[str, list[str]], list[str]] = Table({}, [])
     statuses_sequence = statuses_table.as_sequence()
     statuses_sequence.initialize_keys(["check", "status"])
@@ -134,7 +134,7 @@ def _generate_status_file(
         statuses_sequence.append(check_status_entry)
 
     status_file_contents = table_to_csv.convert_to_csv_data(statuses_table)
-    return {_STATUS_FILEPATH: status_file_contents}
+    return {_STATUS_FILEPATH: (FileReadType.IN_MEMORY, [status_file_contents])}
 
 def _generate_failed_file(failed: dict[str, str]) -> dict[Path, StringIO]:
     failed_table: Table[dict[str, list[str]], list[str]] = Table({}, [])

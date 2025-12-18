@@ -76,16 +76,21 @@ class ConsoleView(View):
         print("Loading sampling plugins:")
 
     def _on_loading_plugin(self, plugin_name: str) -> None:
-        print(f"\t[{plugin_name}]: Loading...", end="")
+        indentation.print_indented(f"[{plugin_name}]: Loading...", 1, end="")
 
     def _on_plugin_load_success(self, plugin_name: str) -> None:
         ansi.reset_line()
-        ansi.print_ansi_color(f"\t[{plugin_name}]: Loaded", ansi.AnsiColor.BRIGHT_GREEN)
+        ansi.print_ansi_color(
+            indentation.with_indentation(f"[{plugin_name}]: Loaded", 1),
+            ansi.AnsiColor.BRIGHT_GREEN
+        )
 
     def _on_plugin_load_failure(self, plugin_name: str, reason: Exception) -> None:
         ansi.reset_line()
         ansi.print_ansi_color(
-            f"\t[{plugin_name}]: Load Failed ({type(reason).__name__})",
+            indentation.with_indentation(
+                f"[{plugin_name}]: Load Failed ({type(reason).__name__})", 1
+            ),
             ansi.AnsiColor.BRIGHT_RED
         )
 
@@ -116,7 +121,7 @@ class ConsoleView(View):
         print("Sampling from plugins:")
 
     def _on_began_sampling_from_plugin(self, plugin_name: str) -> None:
-        print(f"\t[{plugin_name}]: Sampling...", end="")
+        indentation.print_indented(f"[{plugin_name}]: Sampling...", 1, end="")
 
     def _on_sampling_from_plugin_success(
             self,
@@ -124,25 +129,35 @@ class ConsoleView(View):
             group_sample_counts: dict[str, int]
     ) -> None:
         ansi.reset_line()
-        ansi.print_ansi_color(f"\t[{plugin_name}]:", ansi.AnsiColor.BRIGHT_GREEN)
+        ansi.print_ansi_color(
+            indentation.with_indentation(f"[{plugin_name}]:", 1),
+            ansi.AnsiColor.BRIGHT_GREEN
+        )
         group_lines = [
-            f"\t\t({name}): {group_sample_counts[name]} samples"
-            for name in group_sample_counts
+            indentation.with_indentation(
+                f"{name}): {group_sample_counts[name]} samples", 2
+            ) for name in group_sample_counts
         ]
         print("\n".join(group_lines))
         group_count = len(group_sample_counts)
         sample_count = sum(group_sample_counts.values())
-        print(f"\t\tTotal: {group_count} groups, {sample_count} samples\n")
+        indentation.print_indented(
+            f"Total: {group_count} groups, {sample_count} samples\n", 2
+        )
 
     def _on_sampling_from_plugin_failure(self, plugin_name: str, reason: Exception) -> None:
         ansi.reset_line()
         ansi.print_ansi_color(
-            f"\t[{plugin_name}]: Sampling Failed ({type(reason).__name__})",
+            indentation.with_indentation(
+                f"[{plugin_name}]: Sampling Failed ({type(reason).__name__})", 1
+            ),
             ansi.AnsiColor.BRIGHT_RED
         )
 
     def _on_sampling_from_plugins_success(self, group_count: int, sample_count: int) -> None:
-        print(f"\tGrand Total: {group_count} groups, {sample_count} samples\n")
+        indentation.print_indented(
+            f"Grand Total: {group_count} groups, {sample_count} samples\n", 1
+        )
 
     def _on_sampling_from_plugins_failure(self) -> None:
         ansi.print_ansi_color("Sampling failed. Exiting...", ansi.AnsiColor.BRIGHT_RED)
@@ -192,7 +207,7 @@ class ConsoleView(View):
     ) -> None:
         print(f"Sample {sample_index + 1} / {sample_count}:")
         for variable, value in values.items():
-            print(f"\t{variable}: {value}")
+            indentation.print_indented(f"{variable}: {value}", 1)
         print("")
 
     def _on_running_binary(self, binary_name: str) -> None:
@@ -213,7 +228,7 @@ class ConsoleView(View):
         print("Sample Analysis:")
 
     def _on_began_analysis_with_plugin(self, plugin_name: str) -> None:
-        print(f"\t[{plugin_name}]: Analyzing...", end="")
+        indentation.print_indented(f"[{plugin_name}]: Analyzing...", 1, end="")
 
     def _on_analysis_with_plugin_success(
             self,
@@ -221,7 +236,10 @@ class ConsoleView(View):
             console_output: str,
     ) -> None:
         ansi.reset_line()
-        ansi.print_ansi_color(f"\t[{plugin_name}]:", ansi.AnsiColor.BRIGHT_GREEN)
+        ansi.print_ansi_color(
+            indentation.with_indentation(f"[{plugin_name}]:", 1),
+            ansi.AnsiColor.BRIGHT_GREEN
+        )
         indentation.print_indented(console_output, 2)
         print("")
 
@@ -232,7 +250,9 @@ class ConsoleView(View):
     ) -> None:
         ansi.reset_line()
         ansi.print_ansi_color(
-            f"\t[{plugin_name}]: Analysis Failed ({type(reason).__name__})\n",
+            indentation.with_indentation(
+                f"[{plugin_name}]: Analysis Failed ({type(reason).__name__})\n", 1
+            ),
             ansi.AnsiColor.BRIGHT_RED
         )
 

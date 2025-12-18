@@ -2,7 +2,7 @@ import re
 
 
 def with_indentation(text: str, indent_level: int) -> str:
-    return re.sub(r"^", "\t" * indent_level, text, flags=re.M)
+    return re.sub(r"^", "  " * indent_level, text, flags=re.M)
 
 
 def print_indented(text: str, indent_level: int, **kwargs) -> None:

@@ -8,7 +8,7 @@ from output.events import Event, event_bus
 from plugin_loading import AnalyzerLoader, SamplerLoader
 import root
 from sampling import SampleGroup
-from testing import BinaryRunner, OutputFileReader, ParamEditor, make_defaults_writer
+from testing import BinaryRunner, MaskedModelData, OutputFileReader, ParamEditor
 import testing
 
 
@@ -32,13 +32,12 @@ class Tester:
         self._param_editor = testing.make_param_editor(
             app_root / config["Model"]["parameters"]
         )
-        self._output_file_reader = testing.make_output_file_reader(
+        self._output_file_reader = OutputFileReader(
             app_root / config["Model"]["reference_output"],
-            app_root / config["Model"]["test_output"]
+            app_root / config["Model"]["test_output"],
         )
-        self._group_data_store = testing.GroupDataStore(
-            self._output_file_reader.get_reference_data()
-        )
+        self._reference_data = self._output_file_reader.get_reference_data()
+        self._group_data = []
 
         self._binary_path = app_root / config["Model"]["binary"]
         self._binary_args = config["Model"]["args"]
@@ -180,14 +179,18 @@ class Tester:
             self._test_with_sample(sample)
 
         if (not self._analyzer_loader.any_group_plugins_loaded()
-                or not self._group_data_store.group_data_exists()
+                or not self._group_data
         ):
             return
 
         event_bus.fire_event(Event.BEGAN_GROUP_ANALYSIS)
 
-        group_data = self._group_data_store.pop_group_data()
-        self._analyzer_loader.run_group_analysis(group, group_data)
+        self._analyzer_loader.run_group_analysis(
+            group,
+            self._reference_data,
+            self._group_data,
+        )
+        self._group_data = []
 
     def _test_with_sample(self, sample: Mapping[str, float]) -> None:
         binary_name = self._binary_runner.get_binary_name()
@@ -199,15 +202,20 @@ class Tester:
         event_bus.fire_event(Event.BINARY_EXITED, exit_code=exit_code)
 
         if exit_code:
+            masked_data = MaskedModelData(self._output_file_reader.get_reference_data())
+            self._group_data.append(masked_data)
             return
 
-        reference_data = self._output_file_reader.get_reference_data()
         test_data = self._output_file_reader.read_sample_data()
-        self._group_data_store.store_sample_data(test_data)
+        self._group_data.append(test_data)
 
         if not self._analyzer_loader.any_sample_plugins_loaded():
             return
 
         event_bus.fire_event(Event.BEGAN_SAMPLE_ANALYSIS)
 
-        self._analyzer_loader.run_sample_analysis(sample, reference_data, test_data)
+        self._analyzer_loader.run_sample_analysis(
+            sample,
+            self._reference_data,
+            test_data
+        )

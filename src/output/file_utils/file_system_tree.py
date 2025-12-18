@@ -2,11 +2,17 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
+from enum import Enum, auto
 import os
 from pathlib import Path
 from io import BytesIO, IOBase
 import shutil
 from typing import cast
+
+
+class FileReadType(Enum):
+    IN_MEMORY = auto()
+    TEMP_FILE = auto()
 
 
 class FileSystemNode:
@@ -15,7 +21,7 @@ class FileSystemNode:
         pass
 
 
-class File(FileSystemNode):
+class InMemoryFile(FileSystemNode):
     def __init__(self, extension: str, data: IOBase):
         self._extension = extension
         self._data = data
@@ -96,27 +102,38 @@ class FileSystemTree:
         self._root.add_child(parent_path, name, node)
 
     @classmethod
-    def create_from_file(cls, extension: str, data: IOBase) -> FileSystemTree:
-        file = File(extension, data)
+    def create_from_file(
+            cls, extension: str, read_type: FileReadType, *args
+    ) -> FileSystemTree:
+        file = cls._create_file_by_type(extension, read_type, args)
         return FileSystemTree(file)
 
+    # files maps the path to the resulting file to the read type and list of arguments
+    # to create the file with. Either [BaseIO] for in memory files, or [Path] for a temp
+    # file copy.
     @classmethod
-    def create_from_files(cls, files: Mapping[Path, IOBase]) -> FileSystemTree:
+    def create_from_files(
+            cls, files: Mapping[Path, tuple[FileReadType, list]]
+    ) -> FileSystemTree:
         data_root_directory = Directory()
         file_system_tree = FileSystemTree(data_root_directory)
 
         for path in files:
-            file_data = files[path]
+            read_type, file_args = files[path]
             extension = path.suffix
-            file = File(extension, file_data)
+            file = cls._create_file_by_type(extension, read_type, file_args)
             file_system_tree.add_child(path, file)
 
         return file_system_tree
 
     @classmethod
-    def create_from_temp_file(cls, extension: str, temp_file_path: Path) -> FileSystemTree:
-        file = TempFileCopy(extension, temp_file_path)
-        return FileSystemTree(file)
-
-
-
+    def _create_file_by_type(
+            cls, extension: str, read_type: FileReadType, file_args
+    ) -> FileSystemNode:
+        match read_type:
+            case FileReadType.IN_MEMORY:
+                return InMemoryFile(extension, *file_args)
+            case FileReadType.TEMP_FILE:
+                return TempFileCopy(extension, *file_args)
+            case _:
+                raise ValueError("Invalid FileReadType")
