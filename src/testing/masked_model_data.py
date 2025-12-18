@@ -1,3 +1,4 @@
+from collections import namedtuple
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -7,34 +8,52 @@ import numpy.typing as npt
 from testing.model_data import ModelData
 
 
+MetaEntry = namedtuple("MetaEntry", ["shape", "dtype", "dimensions"])
+
+
 # Used when data is known to be invalid for a sample, but group analysis plugins still
 # need to see the same structure used for the data. Will keep all properties of the
 # ModelData it wraps (usually the reference), but all values returned will be masked.
 class MaskedModelData(ModelData):
     def __init__(self, wrapped_data: ModelData):
-        self._wrapped_data = wrapped_data
+        self._variable_metadata = self._read_metadata(wrapped_data)
 
     def get_backing_filepath(self) -> Path:
         return None
     
     def get_dimensions_for_variable(self, variable: str) -> tuple[str]:
-        return self._wrapped_data.get_dimensions_for_variable(variable)
+        return self._variable_metadata[variable].dimensions
 
     def __enter__(self) -> None:
-        self._wrapped_data.__enter__()
+        pass
 
     def __exit__(self, _exc_type, _exc_val, _exc_tb) -> None:
-        self._wrapped_data.__exit__(None, None, None)
+        pass
 
+    # Returns a snapshot of the original data, with all elements masked. Should be quick
+    # to allocate since values aren't initialized, but may cause memory useage issues if
+    # too many/too large arrays are used in the future.
     def __getitem__(self, key: str) -> npt.ArrayLike:
-        data = self._wrapped_data[key]
-
-        # Returns a view to the original data (no copy), with all elements masked.
-        masked_data = np.ma.masked_array(data.data, mask=True, copy=False)
-        return masked_data
+        shape = self._variable_metadata[key].shape
+        dtype = self._variable_metadata[key].dtype
+        return np.ma.masked_array(np.empty(shape, dtype=dtype), mask=True)
 
     def __iter__(self) -> Iterator:
-        return self._wrapped_data.__iter__()
+        return iter(self._variable_metadata)
 
     def __len__(self) -> int:
-        return len(self._wrapped_data)
+        return len(self._variable_metadata)
+
+    def _read_metadata(self, wrapped_data: ModelData) -> dict[str, MetaEntry]:
+        result = {}
+
+        with wrapped_data:
+            for variable, data in wrapped_data.items():
+                shape = data.shape
+                dtype = data.dtype
+                dimensions = wrapped_data.get_dimensions_for_variable(variable)
+
+                result[variable] = MetaEntry(shape, dtype, dimensions)
+
+        return result
+
