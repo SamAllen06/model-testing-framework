@@ -9,8 +9,9 @@ from output.file_utils import FileSystemTree
 from testing import ModelData
 from util import Table
 
+from analysis_libs.diff_store import DifferenceStore
+
 from . import output
-from .difference_store import DifferenceStore
 
 
 DIFFERENCE_KEYS = ["reference", "test", "difference", "index"]
