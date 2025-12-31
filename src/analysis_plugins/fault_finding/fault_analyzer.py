@@ -5,9 +5,12 @@ from pathlib import Path
 import sys
 from typing import Callable
 
+import numpy.typing as npt
+
 from analysis import PerSampleAnalyzer
 from output.file_utils import FileSystemTree
 import root
+from testing import ModelData
 from util import ScopedImporter
 
 from . import output
@@ -19,6 +22,8 @@ _CONFIG_PATH = root.get_config_path(
 _CONFIG = ConfigParser()
 _CONFIG.read(_CONFIG_PATH)
 
+_SEPERATORS = ["%", "__"]
+
 
 class _CheckFunction:
     def __init__(self, name: str, function: Callable):
@@ -28,7 +33,7 @@ class _CheckFunction:
 
     def call(
             self,
-            data: Mapping[str, float | Sequence[float]]
+            data: Mapping[str, float | npt.NDArray]
     ) -> tuple[CheckStatus, None | str | Exception]:
         try:
             relevant_args = self._get_relevant_args(data)
@@ -50,9 +55,9 @@ class _CheckFunction:
 
     def _get_relevant_args(
             self,
-            data: Mapping[str, float | Sequence[float]]
-    ) -> Mapping[str, float | Sequence[float]]:
-        relevant_args: dict[str, float | Sequence[float]] = {}
+            data: Mapping[str, float | npt.NDArray]
+    ) -> Mapping[str, float | npt.NDArray]:
+        relevant_args: dict[str, float | npt.NDArray] = {}
 
         for arg in self._args:
             if arg == "kwargs":
@@ -89,15 +94,16 @@ class FaultAnalyzer(PerSampleAnalyzer):
     def analyze_sample_data(
         self,
         sample: Mapping[str, float],
-        reference_data: Mapping[str, Sequence[float]],
-        test_data: Mapping[str, Sequence[float]]
+        reference_data: ModelData,
+        test_data: ModelData, 
     ) -> tuple[str, FileSystemTree]:
-        data = self._combine_data(sample, reference_data, test_data)
-
         check_results: dict[str, tuple[CheckStatus, None | str | Exception]] = {}
-        for check in self._checks:
-            check_result = check.call(data)
-            check_results[check.get_name()] = check_result
+        with reference_data, test_data:
+            data = self._combine_data(sample, reference_data, test_data)
+
+            for check in self._checks:
+                check_result = check.call(data)
+                check_results[check.get_name()] = check_result
 
         return output.generate_output(check_results)
 
@@ -139,17 +145,24 @@ class FaultAnalyzer(PerSampleAnalyzer):
     def _combine_data(
         self,
         sample: Mapping[str, float],
-        reference_data: Mapping[str, Sequence[float]],
-        test_data: Mapping[str, Sequence[float]]
-    ) -> dict[str, float | Sequence[float]]:
-        data: dict[str, float | Sequence[float]] = dict(sample)
+        reference_data: ModelData,
+        test_data: ModelData
+    ) -> dict[str, float | npt.NDArray]:
+        data: dict[str, float | npt.NDArray] = dict(sample)
 
         for variable, values in reference_data.items():
-            arg_name = self._REFERENCE_PARAM_PREFIX + variable.replace("%", "_")
+            arg_name = self._REFERENCE_PARAM_PREFIX + self._clear_seperator(variable)
             data[arg_name] = values
 
         for variable, values in test_data.items():
-            arg_name = self._TEST_PARAM_PREFIX + variable.replace("%", "_")
+            arg_name = self._TEST_PARAM_PREFIX + self._clear_seperator(variable)
             data[arg_name] = values
 
         return data
+
+    def _clear_seperator(self, name: str) -> str:
+        for seperator in _SEPERATORS:
+            if seperator in name:
+                return name.replace(seperator, "_")
+        
+        return name

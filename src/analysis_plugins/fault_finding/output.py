@@ -5,7 +5,7 @@ import traceback
 from typing import cast
 
 from output.console_utils import ansi
-from output.file_utils import FileSystemTree, table_to_csv
+from output.file_utils import FileReadType, FileSystemTree, table_to_csv
 from util import Table
 
 from .check_status import CheckStatus
@@ -145,7 +145,7 @@ def _generate_failed_file(failed: dict[str, str]) -> dict[Path, StringIO]:
         failed_sequence.append({"check": check, "message": message})
 
     failed_file_contents = table_to_csv.convert_to_csv_data(failed_sequence)
-    return {_FAILED_FILEPATH: failed_file_contents}
+    return {_FAILED_FILEPATH: (FileReadType.IN_MEMORY, [failed_file_contents])}
 
 def _generate_error_files(errored: dict[str, Exception]) -> dict[Path, StringIO]:
     files: dict[Path, StringIO] = {}
@@ -157,6 +157,6 @@ def _generate_error_files(errored: dict[str, Exception]) -> dict[Path, StringIO]
         formatted_exception = "".join(traceback.format_exception(error))
         file_contents.write(formatted_exception)
 
-        files[filepath] = file_contents
+        files[filepath] = (FileReadType.IN_MEMORY, [file_contents])
 
     return files
