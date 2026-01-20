@@ -1,12 +1,11 @@
 from enum import auto, Enum
 
 from output.file_utils import FileSystemTree
+from sampling import Sample
 
 
 class Event(Enum):
-    INITIALIZE = auto()
-
-    LOADING_BINARY = auto()
+    INITIALIZE = auto() LOADING_BINARY = auto()
     BINARY_LOAD_SUCCESS = auto()
     BINARY_LOAD_FAILURE = auto()
 
@@ -95,7 +94,7 @@ EVENT_PARAMETERS: dict[Event, dict[str, type]] = {
     Event.SAMPLE_GENERATED: {
         "sample_index": int,
         "sample_count": int,
-        "values": dict[str, float],
+        "sample": Sample,
     },
     Event.RUNNING_BINARY: {"binary_name": str},
     Event.BINARY_EXITED: {"exit_code": int},

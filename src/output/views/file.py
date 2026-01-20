@@ -8,6 +8,7 @@ from output.events import Event
 from output.file_utils import FileSystemTree
 from output.views.view import View
 import root
+from sampling import Sample
 
 
 class FileView(View):
@@ -84,7 +85,7 @@ class FileView(View):
             self,
             sample_index: int,
             sample_count: int,
-            values: dict[str, float]
+            sample: Sample
     ) -> None:
         self._current_sample = sample_index
 

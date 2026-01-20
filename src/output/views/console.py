@@ -4,6 +4,7 @@ from sys import stderr
 from output.console_utils import ansi, indentation
 from output.events import Event, event_bus
 from output.views.view import View
+from sampling import Sample
 
 
 class ConsoleView(View):
@@ -203,7 +204,7 @@ class ConsoleView(View):
             self,
             sample_index: int,
             sample_count: int,
-            values: dict[str, float]
+            sample: Sample
     ) -> None:
         print(f"Sample {sample_index + 1} / {sample_count}:")
         for variable, value in values.items():
