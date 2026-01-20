@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Mapping
 
-from sampling import SampleGroup
+from sampling.sample_group import SampleGroup
 
 
 class Sampler(ABC):
