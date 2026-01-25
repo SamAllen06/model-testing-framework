@@ -136,7 +136,7 @@ class ConsoleView(View):
         )
         group_lines = [
             indentation.with_indentation(
-                f"{name}): {group_sample_counts[name]} samples", 2
+                f"{name}: {group_sample_counts[name]} samples", 2
             ) for name in group_sample_counts
         ]
         print("\n".join(group_lines))
@@ -207,7 +207,7 @@ class ConsoleView(View):
             sample: Sample
     ) -> None:
         print(f"Sample {sample_index + 1} / {sample_count}:")
-        for variable, value in values.items():
+        for variable, value in sample.get_changed_values().items():
             indentation.print_indented(f"{variable}: {value}", 1)
         print("")
 

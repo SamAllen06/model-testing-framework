@@ -198,8 +198,8 @@ class LogsView(View):
             f'({group_index + 1} / {group_count})'
         )
 
-    def _on_sample_generated(self, sample_index: int, sample: Sample) -> None:
-        self._LOGGER.info(f"Generated sample {sample_index + 1} out of {sample_count}")
+    def _on_sample_generated(self, sample_index: int, sample_count: int, sample: Sample) -> None:
+        self._LOGGER.info(f"Generated sample {sample_index + 1} of {sample_count}")
 
     def _on_running_binary(self, binary_name: str) -> None:
         self._LOGGER.info(f"Running {binary_name}")

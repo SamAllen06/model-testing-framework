@@ -7,7 +7,7 @@ import time
 from output.events import Event, event_bus
 from plugin_loading import AnalyzerLoader, SamplerLoader
 import root
-from sampling import SampleGroup
+from sampling import Sample, SampleGroup
 from testing import BinaryRunner, MaskedModelData, OutputFileReader, ParamEditor
 import testing
 
@@ -28,6 +28,8 @@ class Tester:
         self._defaults = testing.read_defaults(
             app_root / config["Model"]["parameter_defaults"]
         )
+        Sample.set_defaults(self._defaults)
+
         self._param_editor = testing.make_param_editor(
             app_root / config["Model"]["parameters"]
         )
