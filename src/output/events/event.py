@@ -5,7 +5,8 @@ from sampling import Sample
 
 
 class Event(Enum):
-    INITIALIZE = auto() LOADING_BINARY = auto()
+    INITIALIZE = auto()
+    LOADING_BINARY = auto()
     BINARY_LOAD_SUCCESS = auto()
     BINARY_LOAD_FAILURE = auto()
 
