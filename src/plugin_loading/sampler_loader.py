@@ -43,6 +43,7 @@ class SamplerLoader(PluginLoader):
                     plugin_name=plugin_name,
                     reason=error
                 )
+                continue
 
             self._add_new_sample_groups(
                 sample_groups,
