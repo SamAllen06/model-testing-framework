@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Mapping
 
 import root
-from sampling.sampler import Sampler
+from sampling import SampleGroup, Sampler
 
 from sampling_libs.ranges import BoundTranslator
 from sampling_libs.ranges import RangeReader
@@ -28,21 +28,22 @@ class OrderSampler(Sampler):
         self._order_factory = OrderFactory(bound_translator)
         self._order_directory = APP_ROOT / config_parser["Paths"]["order_directory"]
 
-    def get_sample_groups(self) -> Mapping[str, Order]:
+    def get_sample_groups(self) -> Mapping[str, SampleGroup]:
         order_paths = list(self._order_directory.glob("*.json"))
 
-        orders = {}
+        groups = {}
 
         for path in order_paths:
             order_name = path.name.removesuffix(".json")
             order_data = self._read_order_data(path)
 
             try:
-                orders[order_name] = self._order_factory.construct_order(order_data)
+                order = self._order_factory.construct_order(order_data)
+                groups[order_name] = order.to_sample_group()
             except KeyError:
                 raise KeyError(f"Invalid order format in order {order_name}")
 
-        return orders
+        return groups
 
     def _read_order_data(self, order_path: Path) -> Order:
         with open(order_path) as order_file:

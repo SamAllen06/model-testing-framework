@@ -1,4 +1,8 @@
-from sampling import SampleGroupIterator
+from collections.abc import Iterator
+
+import numpy as np
+
+from sampling import Sample, SampleGroup
 
 from sampling_libs.ranges import BoundTranslator
 from .order import Order
@@ -8,15 +12,18 @@ class BoxOrder(Order):
     def __init__(self, order_data, bound_translator: BoundTranslator):
         self._bound_translator = bound_translator
         self._ranges = self._read_ranges(order_data["ranges"])
+    
+    def to_sample_group(self) -> SampleGroup:
+        samples = []
 
-    def get_sample_count(self) -> int:
-        sample_count = 1
+        for sample in BoxOrderIterator(self._ranges):
+            values = {}
+            for var, value in sample.items():
+                values[var] = np.array(value)
 
-        for parameter in self._ranges.keys():
-            subsample_count = self._ranges[parameter][2]
-            sample_count *= subsample_count
+            samples.append(Sample(values))
 
-        return sample_count
+        return SampleGroup(samples)
 
     def __iter__(self):
         return BoxOrderIterator(self._ranges)
@@ -35,7 +42,7 @@ class BoxOrder(Order):
         return ranges
 
 
-class BoxOrderIterator(SampleGroupIterator):
+class BoxOrderIterator(Iterator):
     def __init__(self, ranges: dict[str, tuple[float, float, int]]):
         self._ranges = ranges
         self._parameter_order = [parameter for parameter in self._ranges.keys()]
