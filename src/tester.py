@@ -13,6 +13,12 @@ import testing
 
 
 class Tester:
+    """
+    Ties together the entirety of the testing program. Allows the user to verify that 
+    the plugins they need have been loaded and that the time estimated for testing is
+    reasonable. If so, it runs the tests. 
+    """
+
     def __init__(self) -> None:
         config_path = root.get_config_path(root.ConfigPath.ROOT) / "main.ini"
         app_root = root.get_app_root()
@@ -46,6 +52,14 @@ class Tester:
         self._sample_groups: dict[str, SampleGroup] = {}
 
     def prepare_for_testing(self) -> None:
+        """
+        Verifies that the binary can be found, loads both the sampling and analysis
+        plugins, gets all sampling groups from their respective plugins, and makes an
+        estimate for how long testing will take. 
+        
+        :param self: The instance of the class in which this method is called
+        """
+
         event_bus.fire_event(Event.INITIALIZE)
 
         self._load_binary()
@@ -58,6 +72,18 @@ class Tester:
         self._estimate_testing_time(sample_count)
 
     def test_model(self) -> None:
+        """
+        Runs through the testing loop, iteratively testing each SampleGroup. For each
+        SampleGroup, it resets the parameters file to its defaults, iteratively tests
+        each Sample inside each group, and sends the resulting test data for the entire
+        group of samples to the SampleGroupAnalyzer as a Table. For each Sample, it
+        sets the parameters file to the values specified by the sample, runs the binary,
+        and sends the resulting test data along with the reference data to the
+        PerSampleAnalyzer. 
+
+        :param self: The instance of the class in which this method is called
+        """
+
         group_count = len(self._sample_groups)
 
         for group_index, (group_name, sample_group) in enumerate(
