@@ -7,6 +7,10 @@ from sampling.sample import Sample
 # but also because "sample groups" have become a useful abstraction for other parts of 
 # the program.
 class SampleGroup(Sequence):
+    """
+    Returns samples in the order that they should be tested.
+    """
+
     def __init__(self, samples: Sequence[Sample]):
         self._samples = samples
 
