@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 
 from output.file_utils import FileSystemTree
+from sampling import Sample
 from testing import ModelData
 
 
@@ -9,7 +10,7 @@ class PerSampleAnalyzer(ABC):
     @abstractmethod
     def analyze_sample_data(
         self,
-        sample: Mapping[str, float],
+        sample: Sample,
         reference_data: ModelData,
         test_data: ModelData, 
     ) -> tuple[str, FileSystemTree]:

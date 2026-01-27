@@ -10,6 +10,7 @@ import numpy.typing as npt
 from analysis import PerSampleAnalyzer
 from output.file_utils import FileSystemTree
 import root
+from sampling import Sample
 from testing import ModelData
 from util import ScopedImporter
 
@@ -93,7 +94,7 @@ class FaultAnalyzer(PerSampleAnalyzer):
 
     def analyze_sample_data(
         self,
-        sample: Mapping[str, float],
+        sample: Sample,
         reference_data: ModelData,
         test_data: ModelData, 
     ) -> tuple[str, FileSystemTree]:
@@ -147,8 +148,8 @@ class FaultAnalyzer(PerSampleAnalyzer):
         sample: Mapping[str, float],
         reference_data: ModelData,
         test_data: ModelData
-    ) -> dict[str, float | npt.NDArray]:
-        data: dict[str, float | npt.NDArray] = dict(sample)
+    ) -> dict[str, npt.NDArray]:
+        data: dict[str, npt.NDArray] = dict(sample)
 
         for variable, values in reference_data.items():
             arg_name = self._REFERENCE_PARAM_PREFIX + self._clear_seperator(variable)
