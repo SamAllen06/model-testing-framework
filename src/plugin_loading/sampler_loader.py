@@ -43,6 +43,7 @@ class SamplerLoader(PluginLoader):
                     plugin_name=plugin_name,
                     reason=error
                 )
+                continue
 
             self._add_new_sample_groups(
                 sample_groups,
@@ -51,7 +52,7 @@ class SamplerLoader(PluginLoader):
             )
 
             group_sample_counts = {
-                group_name: sampler_sample_groups[group_name].get_sample_count()
+                group_name: len(sampler_sample_groups[group_name])
                 for group_name in sampler_sample_groups
             }
 

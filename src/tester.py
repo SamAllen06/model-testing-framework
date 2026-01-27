@@ -7,7 +7,7 @@ import time
 from output.events import Event, event_bus
 from plugin_loading import AnalyzerLoader, SamplerLoader
 import root
-from sampling import SampleGroup
+from sampling import Sample, SampleGroup
 from testing import BinaryRunner, MaskedModelData, OutputFileReader, ParamEditor
 import testing
 
@@ -25,10 +25,11 @@ class Tester:
         self._sampler_loader = SamplerLoader()
         self._analyzer_loader = AnalyzerLoader()
 
-        self._defaults_writer = testing.make_defaults_writer(
-            app_root / config["Model"]["parameter_defaults"],
-            app_root / config["Model"]["parameters"]
+        self._defaults = testing.read_defaults(
+            app_root / config["Model"]["parameter_defaults"]
         )
+        Sample.set_defaults(self._defaults)
+
         self._param_editor = testing.make_param_editor(
             app_root / config["Model"]["parameters"]
         )
@@ -70,7 +71,7 @@ class Tester:
             )
             self._test_with_group(sample_group)
 
-        self._defaults_writer.write_defaults()
+        self._param_editor.modify_parameters(self._defaults)
         event_bus.fire_event(Event.TESTING_COMPLETED)
 
     def _load_binary(self) -> None:
@@ -136,13 +137,13 @@ class Tester:
         count = 0
 
         for group in sample_groups.values():
-            count += group.get_sample_count()
+            count += len(group)
 
         return count
 
     def _estimate_testing_time(self, sample_count: int) -> None:
         binary_name = self._binary_runner.get_binary_name()
-        self._defaults_writer.write_defaults()
+        self._param_editor.modify_parameters(self._defaults)
         
         event_bus.fire_event(Event.BEGAN_TIMING_BINARY, binary_name=binary_name)
 
@@ -162,18 +163,15 @@ class Tester:
         )
 
     def _test_with_group(self, group: SampleGroup) -> None:
+        self._param_editor.modify_parameters(self._defaults)
         sample_count = len(group)
-        self._defaults_writer.write_defaults()
-        full_sample_values = self._defaults_writer.get_defaults()
 
         for index, sample in enumerate(group):
-            full_sample_values.update(sample)
-
             event_bus.fire_event(
                 Event.SAMPLE_GENERATED,
                 sample_index=index,
                 sample_count=sample_count,
-                values=full_sample_values
+                sample=sample
             )
 
             self._test_with_sample(sample)
@@ -192,10 +190,10 @@ class Tester:
         )
         self._group_data = []
 
-    def _test_with_sample(self, sample: Mapping[str, float]) -> None:
+    def _test_with_sample(self, sample: Sample) -> None:
         binary_name = self._binary_runner.get_binary_name()
 
-        self._param_editor.modify_parameters(sample)
+        self._param_editor.modify_parameters(sample.get_changed_values())
 
         event_bus.fire_event(Event.RUNNING_BINARY, binary_name=binary_name)
         exit_code = self._binary_runner.run_binary()

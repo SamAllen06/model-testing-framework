@@ -1,4 +1,8 @@
-from sampling import SampleGroupIterator
+from collections.abc import Iterator
+
+import numpy as np
+
+from sampling import Sample, SampleGroup
 
 from sampling_libs.ranges import BoundTranslator
 from .order import Order
@@ -10,11 +14,17 @@ class LineOrder(Order):
         self._samples = order_data["samples"]
         self._ranges = self._read_ranges(order_data["ranges"])
 
-    def get_sample_count(self) -> int:
-        return self._samples
+    def to_sample_group(self) -> SampleGroup:
+        samples = []
 
-    def __iter__(self):
-        return LineOrderIterator(self._samples, self._ranges)
+        for sample in LineOrderIterator(self._samples, self._ranges):
+            values = {}
+            for var, value in sample.items():
+                values[var] = np.array(value)
+
+            samples.append(Sample(values))
+
+        return SampleGroup(samples)
 
     def _read_ranges(self, ranges_data) -> dict[str, tuple[float, float]]:
         ranges = {}
@@ -29,7 +39,7 @@ class LineOrder(Order):
         return ranges
 
 
-class LineOrderIterator(SampleGroupIterator):
+class LineOrderIterator(Iterator):
     def __init__(self, sample_count: int, ranges: dict[str, tuple[float, float]]):
         self._sample_count = sample_count
         self._ranges = ranges

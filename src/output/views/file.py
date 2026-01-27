@@ -8,6 +8,7 @@ from output.events import Event
 from output.file_utils import FileSystemTree
 from output.views.view import View
 import root
+from sampling import Sample
 
 
 class FileView(View):
@@ -84,12 +85,12 @@ class FileView(View):
             self,
             sample_index: int,
             sample_count: int,
-            values: dict[str, float]
+            sample: Sample
     ) -> None:
         self._current_sample = sample_index
 
         if not self._parameter_order:
-            self._parameter_order = list(values.keys())
+            self._parameter_order = list(sample.get_changed_values().keys())
 
         sample_group_file = self._samples_directory / f"{self._current_group}.csv"
         is_first_write = not sample_group_file.exists()
@@ -100,7 +101,7 @@ class FileView(View):
             if is_first_write:
                 writer.writerow(self._parameter_order)
 
-            sample_row = [values[parameter] for parameter in self._parameter_order]
+            sample_row = [sample[parameter] for parameter in self._parameter_order]
             writer.writerow(sample_row)
 
     def _on_binary_exited(self, exit_code: int) -> None:

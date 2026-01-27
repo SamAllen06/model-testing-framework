@@ -4,6 +4,7 @@ from sys import stderr
 from output.console_utils import ansi, indentation
 from output.events import Event, event_bus
 from output.views.view import View
+from sampling import Sample
 
 
 class ConsoleView(View):
@@ -135,7 +136,7 @@ class ConsoleView(View):
         )
         group_lines = [
             indentation.with_indentation(
-                f"{name}): {group_sample_counts[name]} samples", 2
+                f"{name}: {group_sample_counts[name]} samples", 2
             ) for name in group_sample_counts
         ]
         print("\n".join(group_lines))
@@ -203,10 +204,10 @@ class ConsoleView(View):
             self,
             sample_index: int,
             sample_count: int,
-            values: dict[str, float]
+            sample: Sample
     ) -> None:
         print(f"Sample {sample_index + 1} / {sample_count}:")
-        for variable, value in values.items():
+        for variable, value in sample.get_changed_values().items():
             indentation.print_indented(f"{variable}: {value}", 1)
         print("")
 

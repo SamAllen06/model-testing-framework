@@ -1,32 +1,19 @@
-from abc import ABC, abstractmethod
-from collections.abc import Iterable, Iterator, Mapping, Sized
+from collections.abc import Sequence
+
+from sampling.sample import Sample
 
 
-class SampleGroupIterator(ABC, Iterator):
-    @abstractmethod
-    def __next__(self) -> Mapping[str, float]:
-        pass
+# Effectively an immutable wrapper for a list of Samples. Useful for the immutability
+# but also because "sample groups" have become a useful abstraction for other parts of 
+# the program.
+class SampleGroup(Sequence):
+    def __init__(self, samples: Sequence[Sample]):
+        self._samples = samples
 
 
-class SampleGroup(ABC, Iterable, Sized):
-    @abstractmethod
-    def get_sample_count(self) -> int:
-        pass
+    def __getitem__(self, index: int) -> Sample:
+        return self._samples[index]
 
-    @abstractmethod
-    def __iter__(self) -> SampleGroupIterator:
-        pass
-
-    def collapse_and_fill_down(self) -> list[dict[str, float]]:
-        current_sample = {}
-        result = []
-
-        for sample in self:
-            for key, value in sample.items():
-                current_sample[key] = value
-            result.append(current_sample.copy())
-
-        return result
 
     def __len__(self) -> int:
-        return self.get_sample_count()
+        return len(self._samples)

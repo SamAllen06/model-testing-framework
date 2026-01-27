@@ -3,11 +3,12 @@ from pathlib import Path
 from typing import Mapping
 
 import netCDF4
+import numpy.typing as npt
 
 
 class ParamEditor(ABC):
     @abstractmethod
-    def modify_parameters(self, value_map: Mapping[str, float]) -> None:
+    def modify_parameters(self, value_map: Mapping[str, npt.NDArray]) -> None:
         pass
 
 
@@ -15,7 +16,7 @@ class TextParamEditor(ParamEditor):
     def __init__(self, file_path: Path):
         self.file_path = file_path
 
-    def modify_parameters(self, value_map: Mapping[str, float]) -> None:
+    def modify_parameters(self, value_map: Mapping[str, npt.NDArray]) -> None:
         with open(self.file_path, "r") as file:
             lines = file.readlines()
 
@@ -24,6 +25,15 @@ class TextParamEditor(ParamEditor):
         for index, line in enumerate(lines):
             stripped_line = line.strip()
             if stripped_line in value_map:
+                value = value_map[stripped_line]
+
+                # If not a 0D array (scalar), throw an error.
+                if not value.shape == ():
+                    raise ValueError(
+                        f"Value for {stripped_line} is not a scalar, which is not "
+                        "supported in a text parameter file"
+                    )
+
                 lines[index + 1] = str(value_map[stripped_line]) + "\n"
                 found_map[stripped_line] = True
 
@@ -42,7 +52,7 @@ class NetCDFParamEditor(ParamEditor):
     def __init__(self, file_path: Path):
         self.file_path = file_path
 
-    def modify_parameters(self, value_map: Mapping[str, float]) -> None:
+    def modify_parameters(self, value_map: Mapping[str, npt.NDArray]) -> None:
         with netCDF4.Dataset(self.file_path, "r+", format="NETCDF4") as dataset:
             found_map = {parameter: False for parameter in value_map.keys()}
 
@@ -50,7 +60,7 @@ class NetCDFParamEditor(ParamEditor):
                 if name not in value_map.keys():
                     continue
 
-                dataset.variables[name][0] = value
+                dataset.variables[name] = value
                 found_map[name] = True
                 
             not_found = []
