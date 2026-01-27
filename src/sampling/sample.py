@@ -4,6 +4,10 @@ import numpy.typing as npt
 
 
 class Sample(Mapping):
+    """
+    Dictionary that maps input parameter names to their values. 
+    """
+
     # Only values differing from the defaults need to be provided.
     def __init__(self, values: Mapping[str, npt.NDArray]):
         self._ensure_in_defaults(values)
@@ -12,11 +16,27 @@ class Sample(Mapping):
 
     @classmethod
     def set_defaults(cls, defaults: Mapping[str, npt.NDArray]) -> None:
+        """
+        Sets the default values for the sample. 
+        
+        :param cls: A class whose defaults will be set
+        :param defaults: The default values for the variables used in the sample
+        :type defaults: Mapping[str, npt.NDArray]
+        """
+
         cls._defaults = defaults
 
 
     # For instances when we only want to use the values that differ from the defaults.
     def get_changed_values(self) -> Mapping[str, npt.NDArray]:
+        """
+        Returns the sample's values that changed from their defaults.
+        
+        :param self: The instance of the class in which this method is called
+        :return: The values in the sample that changed from their defaults
+        :rtype: Mapping[str, Any]
+        """
+
         return self._values
 
 
