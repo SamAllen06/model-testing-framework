@@ -8,7 +8,8 @@ from sampling.sample import Sample
 # the program.
 class SampleGroup(Sequence):
     """
-    Returns samples in the order that they should be tested.
+    A logical grouping of samples from a sampling plugin in a defined order to be passed
+    to the analysis plugins.
     """
 
     def __init__(self, samples: Sequence[Sample]):

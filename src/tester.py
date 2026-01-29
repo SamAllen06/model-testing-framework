@@ -53,11 +53,9 @@ class Tester:
 
     def prepare_for_testing(self) -> None:
         """
-        Verifies that the binary can be found, loads both the sampling and analysis
-        plugins, gets all sampling groups from their respective plugins, and makes an
+        Verifies that the model can be found, loads both the sampling and analysis
+        plugins, gets all sample groups from their respective plugins, and makes an
         estimate for how long testing will take. 
-        
-        :param self: The instance of the class in which this method is called
         """
 
         event_bus.fire_event(Event.INITIALIZE)
@@ -73,15 +71,15 @@ class Tester:
 
     def test_model(self) -> None:
         """
-        Runs through the testing loop, iteratively testing each SampleGroup. For each
-        SampleGroup, it resets the parameters file to its defaults, iteratively tests
-        each Sample inside each group, and sends the resulting test data for the entire
-        group of samples to the SampleGroupAnalyzer as a Table. For each Sample, it
-        sets the parameters file to the values specified by the sample, runs the binary,
-        and sends the resulting test data along with the reference data to the
-        PerSampleAnalyzer. 
-
-        :param self: The instance of the class in which this method is called
+        Runs through the testing loop, iteratively testing each SampleGroup.
+        
+        For each SampleGroup, it resets the parameters file to its defaults, iteratively
+        tests each Sample inside each group, and sends the resulting test data for the
+        entire group of samples to the SampleGroupAnalyzer as a ModelData.
+        
+        For each Sample, it sets the parameters file to the values specified by the
+        sample, runs the model, and sends the resulting test data along with the
+        reference data to the PerSampleAnalyzer.
         """
 
         group_count = len(self._sample_groups)
