@@ -8,7 +8,8 @@ import numpy.typing as npt
 
 class ParamEditor(ABC):
     """
-    Modifies the values of parameters stored in the model's input parameter file.
+    Abstract class for modifying the values of parameters stored in the model's input
+    parameter file.
     """
 
     @abstractmethod
