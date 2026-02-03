@@ -8,6 +8,10 @@ import root
 
 
 class PluginLoader(ABC):
+    """
+    Abstract class for loading in plugins. 
+    """
+    
     def __init__(
             self,
             acceptable_plugin_classes: Sequence[type],
@@ -23,6 +27,10 @@ class PluginLoader(ABC):
         self._whitelisted_plugins = set(whitelisted_plugins)
 
     def load_plugins(self) -> None:
+        """
+        Loads plugins and corresponding plugin objects.
+        """
+
         discovered_plugin_names = self._discover_plugins_in(
             root.get_source_root() / self._plugins_module_name
         )
@@ -46,6 +54,13 @@ class PluginLoader(ABC):
             self._fire_plugin_load_success_event(plugin_display_name)
 
     def get_total_plugins_loaded_count(self) -> int:
+        """
+        Counts how many plugins have been loaded. 
+        
+        :return: The number of plugins loaded
+        :rtype: int
+        """
+
         count = 0;
 
         for plugin_class in self._plugin_objects:
@@ -103,6 +118,3 @@ class PluginLoader(ABC):
             )
 
         return (PluginClass(), plugin_superclass)
-
-
-
