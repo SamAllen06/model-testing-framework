@@ -33,13 +33,13 @@ class OutputFileReader():
 
     def read_sample_data(self) -> ModelData:
         """
-        Reads sample data from a model.
+        Reads sample test data from a model.
 
-        Sample data is the data produced by a model after it has run using a modified
+        Sample test data is the data produced by a model after it has run using a modified
         parameters file. It has the same format as reference data but is read every time
         the function is called.
         
-        :return: Sample data from a model
+        :return: Sample test data from a model
         :rtype: ModelData
         """
 
