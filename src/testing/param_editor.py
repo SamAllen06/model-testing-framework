@@ -114,7 +114,7 @@ def make_param_editor(file_path: Path) -> ParamEditor:
     
     :param file_path: Path to the file containing parameters
     :type file_path: Path
-    :return: A specific ParamEditor implementation
+    :return: A specific ParamEditor subclass
     :rtype: ParamEditor
     """
 
