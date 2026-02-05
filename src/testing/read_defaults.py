@@ -12,6 +12,16 @@ logger = logging.getLogger("testing")
 
 
 def read_defaults(defaults_path: Path) -> dict[str, npt.NDArray]:
+    """
+    Gets the defaults from a file. 
+    
+    :param defaults_path: Path to the file containing defaults
+    :type defaults_path: Path
+    :return: A dictionary mapping the name of each default type to a NumPy Array of its
+    values
+    :rtype: dict[str, NDArray]
+    """
+
     match defaults_path.suffix:
         case ".txt":
             return _read_text_defaults(defaults_path)
