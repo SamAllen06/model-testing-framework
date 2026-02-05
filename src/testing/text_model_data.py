@@ -12,6 +12,10 @@ from testing.text_dataset import TextDataset
 
 
 class TextModelData(ModelData):
+    """
+    A subclass of ModelData that represents a data file in text form.
+    """
+
     def __init__(self, data_file: Path, move: bool = False):
         self._backing_filepath = self._create_backing_file(data_file, move)
         self._dataset = TextDataset(self._backing_filepath)
@@ -19,9 +23,25 @@ class TextModelData(ModelData):
 
     # Note that if NetcdfModelData is freed, this file will not exist.
     def get_backing_filepath(self) -> Path:
+        """
+        Gets the absolute location of a given file.
+        
+        :return: The path to the given file
+        :rtype: Path
+        """
+
         return self._backing_filepath
     
     def get_dimensions_for_variable(self, variable: str) -> tuple[str]:
+        """
+        Gets the dimensions of a given variable using its name.
+        
+        :param variable: Name of the variable of interest
+        :type variable: str
+        :return: The dimensions of the variable
+        :rtype: tuple[str]
+        """
+
         # Text datasets don't encode dimension information.
         return ("index",)
 
