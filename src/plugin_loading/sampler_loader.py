@@ -13,6 +13,13 @@ UNIQUE_GROUP_NAME_FORMAT = "{sampler}:{name}"
 
 
 class SamplerLoader(PluginLoader):
+    """
+    Loads sampling plugins. 
+
+    A subclass of PluginLoader and expects each plugin to have a "sampler_class"
+    attribute, which should contain a subclass of Sampler
+    """
+
     def __init__(self):
         with open(root.get_config_path(root.ConfigPath.PLUGIN_WHITELIST), "r") as file:
             whitelist = json.load(file)
@@ -25,6 +32,15 @@ class SamplerLoader(PluginLoader):
         )
 
     def sample_from_plugins(self) -> dict[str, SampleGroup]:
+        """
+        Collects SampleGroup(s) from each plugin and returns them in a dictionary
+        mapping the name of the group to the group itself.
+        
+        :return: Dictionary mapping the name of each SampleGroup to the corresponding
+        SampleGroup itself
+        :rtype: dict[str, SampleGroup]
+        """
+        
         sample_groups: dict[str, SampleGroup] = {}
         samplers = self._plugin_objects[Sampler]
 
