@@ -16,8 +16,9 @@ MetaEntry = namedtuple("MetaEntry", ["shape", "dtype", "dimensions"])
 # ModelData it wraps (usually the reference), but all values returned will be masked.
 class MaskedModelData(ModelData):
     """
-    Returns masked values for invalid data from a sample so that group analysis plugins
-    can still see the same structure used for the data.
+    A subclass of ModelData that represents a data file with masked values for invalid
+    data from a sample so that group analysis plugins can still see the same structure
+    used for the data.
     """
 
     def __init__(self, wrapped_data: ModelData):
