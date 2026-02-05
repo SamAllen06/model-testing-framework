@@ -17,7 +17,7 @@ MetaEntry = namedtuple("MetaEntry", ["shape", "dtype", "dimensions"])
 class MaskedModelData(ModelData):
     """
     Returns masked values for invalid data from a sample so that group analysis plugins
-    can still see the same structure used for the data. 
+    can still see the same structure used for the data.
     """
 
     def __init__(self, wrapped_data: ModelData):
@@ -25,7 +25,7 @@ class MaskedModelData(ModelData):
 
     def get_backing_filepath(self) -> Path:
         """
-        Gets the absolute location of a given file. 
+        Gets the absolute location of a given file.
         
         :return: The path to the given file
         :rtype: Path
@@ -35,7 +35,7 @@ class MaskedModelData(ModelData):
     
     def get_dimensions_for_variable(self, variable: str) -> tuple[str]:
         """
-        Gets the dimensions of a given variable using the variable's name. 
+        Gets the dimensions of a given variable using its name.
         
         :param variable: Name of the variable of interest
         :type variable: str
