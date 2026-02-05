@@ -15,13 +15,34 @@ MetaEntry = namedtuple("MetaEntry", ["shape", "dtype", "dimensions"])
 # need to see the same structure used for the data. Will keep all properties of the
 # ModelData it wraps (usually the reference), but all values returned will be masked.
 class MaskedModelData(ModelData):
+    """
+    Returns masked values for invalid data from a sample so that group analysis plugins
+    can still see the same structure used for the data. 
+    """
+
     def __init__(self, wrapped_data: ModelData):
         self._variable_metadata = self._read_metadata(wrapped_data)
 
     def get_backing_filepath(self) -> Path:
+        """
+        Gets the absolute location of a given file. 
+        
+        :return: The path to the given file
+        :rtype: Path
+        """
+
         return None
     
     def get_dimensions_for_variable(self, variable: str) -> tuple[str]:
+        """
+        Gets the dimensions of a given variable using the variable's name. 
+        
+        :param variable: Name of the variable of interest
+        :type variable: str
+        :return: The dimensions of the variable
+        :rtype: tuple[str]
+        """
+
         return self._variable_metadata[variable].dimensions
 
     def __enter__(self) -> None:
