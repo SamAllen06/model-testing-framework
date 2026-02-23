@@ -1,15 +1,14 @@
-from collections.abc import Sequence
+from collections.abc import Sequence, Iterator
 import csv
 from pathlib import Path
 from typing import cast
 
-from sampling import SampleGroup, SampleGroupIterator
 from util import Table
 
 from sampling_libs.ranges import RangeReader
 
 
-class CsvIndicesGroupIterator(SampleGroupIterator):
+class CsvIndicesGroupIterator(Iterator):
     def __init__(
             self,
             index_samples: Table,
@@ -36,7 +35,7 @@ class CsvIndicesGroupIterator(SampleGroupIterator):
         return sample
 
 
-class CsvIndicesGroup(SampleGroup):
+class CsvIndicesGroup:
     def __init__(self, csv_file: Path, range_reader: RangeReader):
         self._index_samples, max_indicies = self._read_index_samples(csv_file)
         self._translation_table = self._generate_translation_table(
