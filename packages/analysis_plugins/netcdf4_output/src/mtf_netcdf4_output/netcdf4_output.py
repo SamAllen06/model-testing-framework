@@ -11,7 +11,7 @@ import numpy.ma as npma
 from mtf import root
 from mtf.analysis import SampleGroupAnalyzer
 from mtf.output.file_utils import FileReadType, FileSystemTree
-from mtf.sampling import SampleGroup
+from mtf.sampling import Sample, SampleGroup
 from mtf.testing import ModelData
 from mtf.util import Table
 
@@ -49,10 +49,8 @@ class NetCDF4Output(SampleGroupAnalyzer):
         reference_data: ModelData,
         sample_data: list[ModelData],
     ) -> None:
-        filled_samples = sample_group.collapse_and_fill_down()
-
-        input_names = [input for input in filled_samples[0].keys()]
-        sample_count = len(filled_samples)
+        input_names = [input for input in sample_group[0].keys()]
+        sample_count = len(sample_group)
 
         dataset.createDimension("sample_index", sample_count)
        
@@ -65,7 +63,7 @@ class NetCDF4Output(SampleGroupAnalyzer):
                 shuffle=False,
                 complevel=1,
             )
-            input_var[:] = [sample[input_name] for sample in filled_samples]
+            input_var[:] = [sample[input_name] for sample in sample_group]
 
         # Create dimensions used by outputs
         with reference_data:
