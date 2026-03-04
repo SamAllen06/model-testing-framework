@@ -14,8 +14,8 @@ from mtf.sampling import Sample
 from mtf.testing import ModelData
 from mtf.util import ScopedImporter
 
-from . import output
-from .check_status import CheckStatus
+from mtf_fault_finding import output
+from mtf_fault_finding.check_status import CheckStatus
 
 _CONFIG_PATH = root.get_config_path(
     root.ConfigPath.ANALYSIS_PLUGINS

@@ -8,7 +8,7 @@ from mtf.output.console_utils import ansi
 from mtf.output.file_utils import FileReadType, FileSystemTree, table_to_csv
 from mtf.util import Table
 
-from .check_status import CheckStatus
+from mtf_fault_finding.check_status import CheckStatus
 
 _STATUS_FILEPATH = Path("check_statuses.csv")
 _FAILED_FILEPATH = Path("failed.csv")

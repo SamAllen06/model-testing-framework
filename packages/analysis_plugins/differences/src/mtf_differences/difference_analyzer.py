@@ -11,7 +11,7 @@ from mtf.util import Table
 
 from mtf_diff_store import DifferenceStore
 
-from . import output
+from mtf_differences import output
 
 
 DIFFERENCE_KEYS = ["reference", "test", "difference", "index"]

@@ -1,3 +1,3 @@
-from .difference_analyzer import DifferenceAnalyzer
+from mtf_differences.difference_analyzer import DifferenceAnalyzer
 
 analyzer_class = DifferenceAnalyzer

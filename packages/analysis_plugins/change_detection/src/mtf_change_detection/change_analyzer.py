@@ -5,7 +5,7 @@ from mtf.output.file_utils import FileSystemTree
 from mtf.sampling import SampleGroup
 from mtf.testing import ModelData
 
-from . import output
+from mtf_change_detection import output
 
 
 class ChangeAnalyzer(SampleGroupAnalyzer):
