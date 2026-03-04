@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from mtf.sampling import SampleGroup
 
-from mtf.sampling_libs.ranges import BoundTranslator
+from mtf_ranges import BoundTranslator
 
 
 class Order(ABC):

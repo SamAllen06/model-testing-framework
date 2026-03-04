@@ -1,4 +1,4 @@
-from mtf.sampling_libs.ranges import BoundTranslator
+from mtf_ranges import BoundTranslator
 from .box_order import BoxOrder
 from .line_order import LineOrder
 from .order import Order

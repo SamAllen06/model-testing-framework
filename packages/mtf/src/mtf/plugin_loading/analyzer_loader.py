@@ -19,7 +19,6 @@ class AnalyzerLoader(PluginLoader):
 
         super().__init__(
             [PerSampleAnalyzer, SampleGroupAnalyzer],
-            "mtf.analysis_plugins",
             "analyzer_class",
             whitelist["analysis"]
         )

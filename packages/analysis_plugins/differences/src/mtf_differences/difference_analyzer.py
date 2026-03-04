@@ -9,7 +9,7 @@ from mtf.output.file_utils import FileSystemTree
 from mtf.testing import ModelData
 from mtf.util import Table
 
-from mtf.analysis_libs.diff_store import DifferenceStore
+from mtf_diff_store import DifferenceStore
 
 from . import output
 

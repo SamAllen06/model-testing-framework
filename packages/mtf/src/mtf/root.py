@@ -14,11 +14,6 @@ class ConfigPath(Enum):
     PLUGIN_WHITELIST = auto()
 
 
-class PluginPath(Enum):
-    SAMPLING_PLUGINS = auto()
-    ANALYSIS_PLUGINS = auto()
-
-
 _initialized = False
 _config_root: Path
 _app_root: Path
@@ -70,24 +65,6 @@ def get_config_path(path_type: ConfigPath) -> Path:
     raise TypeError("path_type must be a ConfigPath")
 
 
-def get_plugin_root(path_type: PluginPath) -> Path:
-    match path_type:
-        case PluginPath.SAMPLING_PLUGINS:
-            return _SRC_PATH / "sampling_plugins"
-        case ConfigPath.ANALYSIS_PLUGINS:
-            return _SRC_PATH / "analysis_plugins"
-
-    raise TypeError("path_type must be a PluginPath")
-
-
 def _require_initialization() -> None:
     if not _initialized:
         raise RuntimeError("The config_root hasn't been set yet; cannot get paths")
-
-
-#CONFIG_ROOT = APP_ROOT / "config"
-#SOURCE_ROOT = APP_ROOT / "src" # Replace with plugin root
-
-#SAMPLING_PLUGIN_CONFIG_DIRECTORY = CONFIG_ROOT / "sampling_plugins"
-#ANALYSIS_PLUGIN_CONFIG_DIRECTORY = CONFIG_ROOT / "analysis_plugins"
-#OUTPUT_CONFIG_DIRECTORY = CONFIG_ROOT / "output"

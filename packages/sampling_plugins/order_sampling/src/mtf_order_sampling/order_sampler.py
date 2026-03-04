@@ -6,7 +6,7 @@ from typing import Mapping
 from mtf import root
 from mtf.sampling import SampleGroup, Sampler
 
-from mtf.sampling_libs.ranges import BoundTranslator, RangeReader
+from mtf_ranges import BoundTranslator, RangeReader
 from .order import Order
 from .order_factory import OrderFactory
 

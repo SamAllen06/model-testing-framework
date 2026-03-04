@@ -11,23 +11,17 @@ class PluginLoader(ABC):
     def __init__(
             self,
             acceptable_plugin_classes: Sequence[type],
-            plugins_module_name: str,
             plugin_class_attribute: str,
             whitelisted_plugins: Sequence[str]
     ):
         self._plugin_objects: dict[type, dict[str, Any]] = {
             plugin_class: {} for plugin_class in acceptable_plugin_classes
         }
-        self._plugins_module_name = plugins_module_name
         self._plugin_class_attribute = plugin_class_attribute
         self._whitelisted_plugins = set(whitelisted_plugins)
 
     def load_plugins(self) -> None:
-        discovered_plugin_names = self._discover_plugins_in(
-            root.get_source_root() / self._plugins_module_name
-        )
-
-        for plugin_name in discovered_plugin_names:
+        for plugin_name in self._whitelisted_plugins:
             plugin_display_name = self._generate_plugin_display_name(plugin_name)
 
             self._fire_loading_plugin_event(plugin_display_name)
@@ -35,7 +29,6 @@ class PluginLoader(ABC):
             try:
                 plugin_object, plugin_superclass = self._load_plugin(
                     plugin_name,
-                    self._plugins_module_name,
                     self._plugin_class_attribute
                 )
             except Exception as error:
@@ -65,16 +58,6 @@ class PluginLoader(ABC):
     def _fire_plugin_load_success_event(self, plugin_name: str) -> None:
         pass
 
-    def _discover_plugins_in(self, path: Path) -> set[str]:
-        plugin_module_names: set[str] = set()
-
-        for plugin_path in path.iterdir():
-            if not plugin_path.is_dir():
-                continue
-            plugin_module_names.add(plugin_path.stem)
-
-        return self._whitelisted_plugins & plugin_module_names
-
     def _generate_plugin_display_name(self, plugin_module_name: str) -> str:
         words = plugin_module_name.split("_")
         words = [word.capitalize() for word in words]
@@ -83,12 +66,11 @@ class PluginLoader(ABC):
     def _load_plugin(
             self,
             plugin_name: str,
-            plugins_module_name: str,
             plugin_class_attribute: str
     ) -> tuple[Any, type]:
         acceptable_classes = [plugin_class for plugin_class in self._plugin_objects]
 
-        plugin_module = importlib.import_module(f"{plugins_module_name}.{plugin_name}")
+        plugin_module = importlib.import_module(plugin_name)
 
         PluginClass = getattr(plugin_module, plugin_class_attribute)
 
@@ -103,6 +85,3 @@ class PluginLoader(ABC):
             )
 
         return (PluginClass(), plugin_superclass)
-
-
-

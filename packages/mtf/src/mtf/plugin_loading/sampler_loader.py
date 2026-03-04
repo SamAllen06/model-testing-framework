@@ -3,7 +3,7 @@ import json
 import pkgutil
 import sys
 
-from mtf import root, sampling_plugins
+from mtf import root
 from mtf.output.events import Event, event_bus
 from mtf.plugin_loading.plugin_loader import PluginLoader
 from mtf.sampling import Sampler, SampleGroup
@@ -18,7 +18,6 @@ class SamplerLoader(PluginLoader):
 
         super().__init__(
             [Sampler],
-            "sampling_plugins",
             "sampler_class",
             whitelist["sampling"]
         )

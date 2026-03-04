@@ -4,7 +4,7 @@ import numpy as np
 
 from mtf.sampling import Sample, SampleGroup
 
-from mtf.sampling_libs.ranges import BoundTranslator
+from mtf_ranges import BoundTranslator
 from .order import Order
 
 
