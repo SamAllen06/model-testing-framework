@@ -15,6 +15,7 @@ class ParameterizedAnsiCode(Enum):
 
 
 class AnsiColor(AnsiCode):
+    BRIGHT_BLACK = _CSI + "90m"
     BRIGHT_RED = _CSI + "91m"
     BRIGHT_GREEN = _CSI + "92m"
     BRIGHT_YELLOW = _CSI + "93m"

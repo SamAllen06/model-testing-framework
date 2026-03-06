@@ -1,7 +1,7 @@
 import re
 
 
-def with_indentation(text: str, indent_level: int) -> str:
+def with_indentation(text: str, indent_level: int = 1) -> str:
     return re.sub(r"^", "  " * indent_level, text, flags=re.M)
 
 
