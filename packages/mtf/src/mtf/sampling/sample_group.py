@@ -11,7 +11,7 @@ class SampleGroup(Sequence):
         self._samples = samples
 
 
-    def __getitem__(self, index: int) -> Sample:
+    def __getitem__(self, index: int | slice) -> Sample | list[Sample]:
         return self._samples[index]
 
 
