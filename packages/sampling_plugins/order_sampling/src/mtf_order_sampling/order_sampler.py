@@ -7,8 +7,8 @@ from mtf import root
 from mtf.sampling import SampleGroup, Sampler
 
 from mtf_ranges import BoundTranslator, RangeReader
-from .order import Order
-from .order_factory import OrderFactory
+from mtf_order_sampling.order import Order
+from mtf_order_sampling.order_factory import OrderFactory
 
 
 CONFIG_FILE = root.get_config_path(
