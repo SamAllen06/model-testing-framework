@@ -39,8 +39,28 @@ class _CheckFunction:
         try:
             relevant_args = self._get_relevant_args(data)
 
-            self._function(**relevant_args)
-
+            returned_status = self._function(**relevant_args)
+            if returned_status is not None:
+                match returned_status:
+                    case CheckStatus.PASSED:
+                        return (CheckStatus.PASSED, None)
+                    case CheckStatus.SKIPPED:
+                        return (CheckStatus.SKIPPED, None)
+                    case CheckStatus.FAILED:
+                        return (
+                            CheckStatus.FAILED, (
+                                "Check manually returned FAILED status, prefer using "
+                                "an assertion instead"
+                            )
+                        )
+                    case CheckStatus.ERROR:
+                        return (
+                            CheckStatus.ERROR,
+                            Exception(
+                                "Check manually returned ERROR status, prefer raising "
+                                "an Exception instead"
+                            )
+                        )
             return (CheckStatus.PASSED, None)
         except AssertionError as assertion:
             message = ""
