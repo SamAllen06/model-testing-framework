@@ -8,14 +8,20 @@ from mtf.output.views import ViewType
 from mtf.tester import Tester
 
 
-# Returns the config directory specified by the user.
-def _parse_arguments_and_validate_config() -> Path:
+# Returns the config directory specified by the user, as well as wether or not to skip
+# the confirmation dialog.
+def _parse_arguments_and_validate_config() -> tuple[Path, bool]:
     parser = ArgumentParser(
         description="Facilitates black-box testing on a scientific model",
         epilog="See the markdown documentation for more details"
     )
 
     parser.add_argument("config_dir", help="path to the config directory")
+    parser.add_argument(
+        "-y", "--yes",
+        help="automatically accept the confirmation dialog",
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
@@ -28,7 +34,7 @@ def _parse_arguments_and_validate_config() -> Path:
     # Using absolute instead of resolve to avoid resolving system links. Allows
     # config_dir to be a system link and output files relative to the link, not where it
     # links to. Note that I haven't tested if this works with the rest of the program.
-    return config_dir.absolute()
+    return config_dir.absolute(), args.yes
 
 
 def _enable_requested_views() -> None:
@@ -43,14 +49,14 @@ def _user_wants_to_continue_testing() -> bool:
 
 
 def main():
-    config_dir = _parse_arguments_and_validate_config()
+    config_dir, skip_confirm = _parse_arguments_and_validate_config()
     root.set_config_root(config_dir)
 
     _enable_requested_views()
 
     tester = Tester()
     tester.prepare_for_testing()
-    if _user_wants_to_continue_testing():
+    if skip_confirm or _user_wants_to_continue_testing():
         tester.test_model()
 
 
