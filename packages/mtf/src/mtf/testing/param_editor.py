@@ -60,7 +60,7 @@ class NetCDFParamEditor(ParamEditor):
                 if name not in value_map.keys():
                     continue
 
-                dataset.variables[name] = value
+                dataset.variables[name][:] = value
                 found_map[name] = True
                 
             not_found = []
