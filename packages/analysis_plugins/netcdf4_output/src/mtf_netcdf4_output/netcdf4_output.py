@@ -55,6 +55,10 @@ class NetCDF4Output(SampleGroupAnalyzer):
         dataset.createDimension("sample_index", sample_count)
        
         for input_name in input_names:
+            # Skip constants with non-scalar values for now.
+            if sample_group[0][input_name].shape != ():
+                continue
+
             input_var = dataset.createVariable(
                 input_name,
                 "f8",

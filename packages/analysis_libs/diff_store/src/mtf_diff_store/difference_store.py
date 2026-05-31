@@ -12,12 +12,17 @@ VariableDifferences = namedtuple(
 
 
 class DifferenceStore(Mapping):
-    def __init__(self, reference: ModelData, test: ModelData):
+    def __init__(
+            self,
+            reference: ModelData,
+            test: ModelData,
+            tolerance_percent: float = 0.0
+    ):
         self._differences = {}
         self._unchanged = []
         self._dimensions = {}
         with reference, test:
-            self._find_differences(reference, test)
+            self._find_differences(reference, test, tolerance_percent)
 
     def get_unchanged_variables(self) -> list[str]:
         return self._unchanged
@@ -34,7 +39,12 @@ class DifferenceStore(Mapping):
     def __len__(self) -> int:
         return len(self._differences)
 
-    def _find_differences(self, reference: ModelData, test: ModelData) -> None:
+    def _find_differences(
+            self,
+            reference: ModelData,
+            test: ModelData,
+            tolerance: float
+    ) -> None:
         for var in reference.keys():
             ref_data = reference[var]
             test_data = test[var]
@@ -46,7 +56,12 @@ class DifferenceStore(Mapping):
                 test_data = np.array([test_data])
 
             total_diff = test_data - ref_data
-            indices = np.nonzero(total_diff)
+            abs_diff = np.abs(total_diff)
+            tolerance_amount = ref_data * tolerance
+            indices = np.where(
+                ((abs_diff > tolerance) | np.isnan(abs_diff))
+                & ~np.ma.getmaskarray(abs_diff)
+            )
 
             ref_values = ref_data[indices]
             test_values = test_data[indices]
