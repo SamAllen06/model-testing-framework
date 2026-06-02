@@ -1,0 +1,19 @@
+[project]
+name = "mtf-ranges"
+version = "1.0.0"
+requires-python = ">=3.14,<4.0"
+dependencies = [
+	"model-testing-framework @ file:../../mtf",
+]
+
+[project.optional-dependencies]
+dev = [
+	"ruff>=15.4,<16.0",
+]
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

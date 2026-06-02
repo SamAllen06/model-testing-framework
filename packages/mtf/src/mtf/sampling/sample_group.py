@@ -1,0 +1,24 @@
+from collections.abc import Sequence
+
+from mtf.sampling.sample import Sample
+
+
+# Effectively an immutable wrapper for a list of Samples. Useful for the immutability
+# but also because "sample groups" have become a useful abstraction for other parts of 
+# the program.
+class SampleGroup(Sequence):
+    """
+    A logical grouping of samples from a sampling plugin in a defined order to be passed
+    to the analysis plugins.
+    """
+
+    def __init__(self, samples: Sequence[Sample]):
+        self._samples = samples
+
+
+    def __getitem__(self, index: int | slice) -> Sample | list[Sample]:
+        return self._samples[index]
+
+
+    def __len__(self) -> int:
+        return len(self._samples)
