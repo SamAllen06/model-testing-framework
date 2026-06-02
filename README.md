@@ -14,7 +14,7 @@ In order to run the program, you will need to provide a config directory. (Confi
 options are described in the `docs/config` directory.) You can run it like so:
 
 ```bash
-python3 src/cli.py /path/to/config/
+mtf config
 ```
 
 It is worth noting that, while the core program does not require any additional Python
