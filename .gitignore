@@ -160,3 +160,6 @@ testing_output/
 
 # Plugin whitelists
 whitelist
+
+# Mac stuff
+*/.DS_Store
