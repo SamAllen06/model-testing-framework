@@ -7,12 +7,32 @@ from pathlib import Path
 # file (use the context-manager), and use the interface provided by the returned
 # Mapping.
 class ModelData(ABC, Mapping):
+    """
+    Represents a data file, saved as a temporary file.
+    """
+
     @abstractmethod
     def get_backing_filepath(self) -> Path:
+        """
+        Abstract method that gets the absolute location of a given file.
+        
+        :return: The path to the given file
+        :rtype: Path
+        """
+
         pass
 
     @abstractmethod
     def get_dimensions_for_variable(self, variable: str) -> tuple[str, ...]:
+        """
+        Abstract method that gets the dimensions of a given variable using its name.
+        
+        :param variable: Name of the variable of interest
+        :type variable: str
+        :return: The dimensions of the variable
+        :rtype: tuple[str, ...]
+        """
+
         pass
 
     @abstractmethod

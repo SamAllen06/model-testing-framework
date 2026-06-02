@@ -13,6 +13,13 @@ from mtf.testing import ModelData
 
 
 class AnalyzerLoader(PluginLoader):
+    """
+    A subclass of Plugin Loader which loads analysis plugins.
+
+    Each analysis plugin must have an "analyzer_class" attribute, which stores a class
+    that extends either PerSampleAnalyzer or SampleGroupAnalyzer.
+    """
+
     def __init__(self):
         with open(root.get_config_path(root.ConfigPath.PLUGIN_WHITELIST), "r") as file:
             whitelist = json.load(file)
@@ -24,9 +31,23 @@ class AnalyzerLoader(PluginLoader):
         )
 
     def any_sample_plugins_loaded(self) -> bool:
+        """
+        Gets whether any sample plugins have been loaded.
+        
+        :return: Whether any sample plugins have been loaded
+        :rtype: bool
+        """
+
         return len(self._plugin_objects[PerSampleAnalyzer]) > 0
 
     def any_group_plugins_loaded(self) -> bool:
+        """
+        Gets whether any group plugins have been loaded.
+        
+        :return: Whether any group plugins have been loaded.
+        :rtype: bool
+        """
+        
         return len(self._plugin_objects[SampleGroupAnalyzer]) > 0
 
     def run_sample_analysis(
@@ -35,6 +56,19 @@ class AnalyzerLoader(PluginLoader):
             reference_data: Mapping[str, Sequence[float]],
             test_data: Mapping[str, Sequence[float]]
     ) -> None:
+        """
+        Runs an analysis on an individual sample plugin.
+        
+        :param sample: A mapping of parameter names to their values
+        :type sample: Mapping[str, float]
+        :param reference_data: A mapping of parameter names to an ordered collection of
+        reference data values
+        :type reference_data: Mapping[str, Sequence[float]]
+        :param test_data: A mapping of parameter names to an ordered collection of test
+        data values
+        :type test_data: Mapping[str, Sequence[float]]
+        """
+        
         for plugin_name, analyzer in self._plugin_objects[PerSampleAnalyzer].items():
             event_bus.fire_event(
                 Event.BEGAN_SAMPLE_ANALYSIS_WITH_PLUGIN,
@@ -64,6 +98,18 @@ class AnalyzerLoader(PluginLoader):
             reference_data: ModelData,
             sample_data: list[ModelData],
     ) -> None:
+        """
+        Runs an analysis on a sample group plugin.
+
+        :param sample_group: A plugin that returns samples in a defined order to be
+        tested
+        :type sample_group: SampleGroup
+        :param reference_data: A data file used to store data from the model
+        :type reference_data: ModelData
+        :param sample_data: A list of ModelData instances
+        :type sample_data: list[ModelData]
+        """
+
         for plugin_name, analyzer in self._plugin_objects[SampleGroupAnalyzer].items():
             event_bus.fire_event(
                 Event.BEGAN_GROUP_ANALYSIS_WITH_PLUGIN,
