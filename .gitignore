@@ -163,3 +163,5 @@ whitelist
 
 # Mac stuff
 */.DS_Store
+packages/mtf/.DS_Store
+packages/mtf/src/.DS_Store
