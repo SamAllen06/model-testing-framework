@@ -15,6 +15,10 @@ VARIABLE_FILL_VALUES = {
 
 # Tells the TextDataset where each variable's data is located in the file.
 class DatasetMeta:
+    """
+    Finds where each variable's data is located in the file. 
+    """
+
     def __init__(self, from_file: BytesIO):
         # { var_name: (data_start, data_end, datatype) }
         self._var_meta = {}
@@ -61,24 +65,62 @@ class DatasetMeta:
             )
 
     def get_range_for_var(self, variable: str) -> tuple[int, int]:
+        """
+        Gets the location of a variable from the file. 
+        
+        :param variable: Name of a variable
+        :type variable: str
+        :return: Tuple containing the start and end position of the variable
+        :rtype: tuple[int, int]
+        """
+
         meta = self._var_meta[variable]
         return (meta[0], meta[1])
 
     def get_type_for_var(self, variable: str) -> Type[np.generic]:
+        """
+        Gets the type of a variable. 
+        
+        :param variable: Name of a variable
+        :type variable: str
+        :return: The generic NumPy type of the variable
+        :rtype: type[generic[Any]]
+        """
+
         meta = self._var_meta[variable]
         return meta[2]
 
     def get_variables(self) -> list[str]:
+        """
+        Gets all of the names of the variables from the file. 
+        
+        :return: List of all the names of the variables from the file
+        :rtype: list[str]
+        """
+
         return list(self._var_meta.keys())
 
 
 class TextDataset:
+    """
+    Docstring for TextDataset
+    """
+
     def __init__(self, filepath: Path):
         self._filepath = filepath
         self._file = open(filepath, "rb")
         self._meta = DatasetMeta(self._file)
 
     def get_variable(self, variable: str) -> np.ma.MaskedArray:
+        """
+        Reads a single variable from the file.
+        
+        :param variable: Name of the variable
+        :type variable: str
+        :return: The values that the variable contains
+        :rtype: MaskedArray[_AnyShape, dtype[Any]]
+        """
+
         self._assert_file_is_open()
 
         start, end = self._meta.get_range_for_var(variable)
@@ -93,16 +135,38 @@ class TextDataset:
         return np.ma.masked_equal(array, mask)
 
     def get_variables(self) -> list[str]:
+        """
+        Gets all of the names of the variables from the file. 
+        
+        :return: List of all the names of the variables from the file
+        :rtype: list[str]
+        """
+
         return self._meta.get_variables()
        
     def reopen(self) -> None:
+        """
+        Opens the file for reading in binary mode. 
+        """
+
         self._file = open(self._filepath, "rb")
 
     def close(self) -> None:
+        """
+        Closes the file.
+        """
+
         self._file.close()
         self._file = None
 
     def is_open(self) -> bool:
+        """
+        Checks if the file is open.
+        
+        :return: Whether the file is open
+        :rtype: bool
+        """
+
         return self._file is not None
 
     def _assert_file_is_open(self) -> None:

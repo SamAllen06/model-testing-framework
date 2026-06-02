@@ -7,6 +7,8 @@ _SRC_PATH = Path(__file__).parent.parent
 
 
 class ConfigPath(Enum):
+    """Identifies which ConfigPath to get."""
+
     ROOT = auto()
     SAMPLING_PLUGINS = auto()
     ANALYSIS_PLUGINS = auto()
@@ -20,6 +22,15 @@ _app_root: Path
 
 
 def set_config_root(config_root: Path) -> None:
+    """
+    Sets the path for the configuration directory, which will be used by the rest of the
+    program. 
+    
+    :param config_root: directory that contains all the configuration files used by the 
+    testing program's modules
+    :type config_root: Path
+    """
+
     global _initialized
     global _config_root
     global _app_root
@@ -38,16 +49,40 @@ def set_config_root(config_root: Path) -> None:
 
 
 def get_app_root() -> Path:
+    """
+    Returns the parent of the configuration directory, which contains all the files 
+    created and modified by the project. 
+    
+    :return: The root of the project
+    :rtype: Path
+    """
+
     _require_initialization()
 
     return _app_root
 
 
 def get_source_root() -> Path:
+    """
+    Returns the directory containing the source code of the program.
+    
+    :return: The root containing the source code of the program
+    :rtype: Path
+    """
+
     return _SRC_PATH
 
 
 def get_config_path(path_type: ConfigPath) -> Path:
+    """
+    Returns the requested configuration directory. 
+    
+    :param path_type: The requested configuration directory
+    :type path_type: ConfigPath
+    :return: The path to the requested configuration directory
+    :rtype: Path
+    """
+
     _require_initialization()
 
     match path_type:

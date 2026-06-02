@@ -7,6 +7,11 @@ from mtf.sampling.sample import Sample
 # but also because "sample groups" have become a useful abstraction for other parts of 
 # the program.
 class SampleGroup(Sequence):
+    """
+    A logical grouping of samples from a sampling plugin in a defined order to be passed
+    to the analysis plugins.
+    """
+
     def __init__(self, samples: Sequence[Sample]):
         self._samples = samples
 

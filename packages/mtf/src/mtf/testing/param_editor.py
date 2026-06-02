@@ -7,16 +7,39 @@ import numpy.typing as npt
 
 
 class ParamEditor(ABC):
+    """
+    Abstract class for modifying the values of parameters stored in the model's input
+    parameter file.
+    """
+
     @abstractmethod
     def modify_parameters(self, value_map: Mapping[str, npt.NDArray]) -> None:
+        """
+        Modifies the values of parameters.
+        
+        :param value_map: A mapping of parameter names to their new values
+        :type value_map: Mapping[str, npt.NDArray]
+        """
+
         pass
 
 
 class TextParamEditor(ParamEditor):
+    """
+    Modifies the values of text parameters stored in the model's input parameter file.
+    """
+
     def __init__(self, file_path: Path):
         self.file_path = file_path
 
     def modify_parameters(self, value_map: Mapping[str, npt.NDArray]) -> None:
+        """
+        Modifies the values of text parameters.
+        
+        :param value_map: A mapping of parameter names to their new values
+        :type value_map: Mapping[str, npt.NDArray]
+        """
+
         with open(self.file_path, "r") as file:
             lines = file.readlines()
 
@@ -49,10 +72,21 @@ class TextParamEditor(ParamEditor):
 
 
 class NetCDFParamEditor(ParamEditor):
+    """
+    Modifies the values of NetCDF parameters stored in the model's input parameter file.
+    """
+
     def __init__(self, file_path: Path):
         self.file_path = file_path
 
     def modify_parameters(self, value_map: Mapping[str, npt.NDArray]) -> None:
+        """
+        Modifies the values of NetCDF parameters.
+        
+        :param value_map: A mapping of parameter names to their new values
+        :type value_map: Mapping[str, npt.NDArray]
+        """
+
         with netCDF4.Dataset(self.file_path, "r+", format="NETCDF4") as dataset:
             found_map = {parameter: False for parameter in value_map.keys()}
 
@@ -76,6 +110,15 @@ class NetCDFParamEditor(ParamEditor):
 
 
 def make_param_editor(file_path: Path) -> ParamEditor:
+    """
+    Returns the ParamEditor that corresponds to the given file type.
+    
+    :param file_path: Path to the file containing parameters
+    :type file_path: Path
+    :return: A specific ParamEditor subclass
+    :rtype: ParamEditor
+    """
+
     extension = file_path.suffix
 
     match extension:
