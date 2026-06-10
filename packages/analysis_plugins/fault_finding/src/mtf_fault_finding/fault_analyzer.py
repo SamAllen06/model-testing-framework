@@ -126,7 +126,7 @@ class FaultAnalyzer(PerSampleAnalyzer):
                 check_result = check.call(data)
                 check_results[check.get_name()] = check_result
 
-        return output.generate_output(check_results)
+        return output.generate_output(check_results, sample)
 
     def _find_check_functions(self) -> list[_CheckFunction]:
         check_modules = self._find_check_modules()

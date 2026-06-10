@@ -9,9 +9,11 @@ from mtf.output.file_utils import FileReadType, FileSystemTree, table_to_csv
 from mtf.util import Table
 
 from mtf_fault_finding.check_status import CheckStatus
+from mtf.sampling import Sample
 
 _STATUS_FILEPATH = Path("check_statuses.csv")
 _FAILED_FILEPATH = Path("failed.csv")
+_CONSTANTS_FILEPATH = Path("constant_values.csv")
 _ERRORS_DIRECTORY = Path("errors")
 _ERROR_FILENAME = "{check_name}.txt"
 
@@ -20,12 +22,13 @@ Summary = namedtuple("Summary", ["total", "passed", "skipped", "failed", "error"
 
 
 def generate_output(
-    check_results: dict[str, tuple[CheckStatus, None | str | Exception]]
+    check_results: dict[str, tuple[CheckStatus, None | str | Exception]],
+    sample: Sample
 ) -> tuple[str, FileSystemTree]:
     summary = _create_summary(check_results)
 
     console_output = _generate_console_output(summary)
-    file_output = _generate_file_output(summary, check_results)
+    file_output = _generate_file_output(summary, check_results, sample)
 
     return (console_output, file_output)
 
@@ -98,11 +101,13 @@ def _generate_console_output(summary: Summary) -> str:
 
 def _generate_file_output(
     summary: Summary,
-    check_results: dict[str, tuple[CheckStatus, None | str | Exception]]
+    check_results: dict[str, tuple[CheckStatus, None | str | Exception]],
+    sample: Sample
 ) -> FileSystemTree:
     files: dict[Path, StringIO] = {}
 
     files |= _generate_status_file(check_results)
+    files |= _generate_constant_values_file(sample)
     if summary.failed:
         files |= _generate_failed_file(summary.failed)
     if summary.error:
@@ -124,6 +129,18 @@ def _generate_status_file(
 
     status_file_contents = table_to_csv.convert_to_csv_data(statuses_table)
     return {_STATUS_FILEPATH: (FileReadType.IN_MEMORY, [status_file_contents])}
+
+def _generate_constant_values_file(sample: Sample) -> dict[Path, tuple[FileReadType, list[StringIO]]]:
+    constants_table: Table[dict[str, float | int], list[str]] = Table({}, [])
+    constants_sequence = constants_table.as_sequence()
+    constants_sequence.initialize_keys(["constant", "value"])
+
+    for constant, value in sample.get_changed_values().items():
+        constant_value_entry = {"constant": constant, "value": value}
+        constants_sequence.append(constant_value_entry)    
+
+    constants_file_contents = table_to_csv.convert_to_csv_data(constants_table)
+    return {_CONSTANTS_FILEPATH: (FileReadType.IN_MEMORY, [constants_file_contents])}
 
 def _generate_failed_file(failed: dict[str, str]) -> dict[Path, StringIO]:
     failed_table: Table[dict[str, list[str]], list[str]] = Table({}, [])
