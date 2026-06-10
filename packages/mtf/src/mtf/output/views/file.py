@@ -128,7 +128,8 @@ class FileView(View):
 
         analysis_tree_parent.mkdir(exist_ok=True, parents=True)
 
-        file_output.write_to_filesystem(analysis_tree_parent, str(self._current_sample))
+        # Add 1 so sample indexing starts at 1 in the filesystem, to match the indexing used in the console output
+        file_output.write_to_filesystem(analysis_tree_parent, str(self._current_sample + 1))
 
     def _on_group_analysis_with_plugin_success(
             self,
