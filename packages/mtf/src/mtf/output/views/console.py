@@ -96,7 +96,11 @@ class ConsoleView(View):
         )
 
     def _on_sampling_plugins_load_success(self, count: int) -> None:
-        print(f"\nLoaded {count} sampling plugins successfully.\n")
+        if count == 1:
+            string = f"\nLoaded {count} sampling plugin successfully.\n"
+        else:
+            string = f"\nLoaded {count} sampling plugins successfully.\n"
+        print(string)
 
     def _on_sampling_plugins_load_failure(self) -> None:
         ansi.print_ansi_color(
@@ -109,7 +113,12 @@ class ConsoleView(View):
         print("Loading analysis plugins:")
 
     def _on_analysis_plugins_load_success(self, count: int) -> None:
-        print(f"\nLoaded {count} analysis plugins successfully.\n")
+        if count == 1:
+            string = f"\nLoaded {count} analysis plugin successfully.\n"
+        else:
+            string = f"\nLoaded {count} analysis plugins successfully.\n"
+        print(string)
+
 
     def _on_analysis_plugins_load_failure(self) -> None:
         ansi.print_ansi_color(
@@ -134,16 +143,29 @@ class ConsoleView(View):
             indentation.with_indentation(f"[{plugin_name}]:", 1),
             ansi.AnsiColor.BRIGHT_GREEN
         )
-        group_lines = [
-            indentation.with_indentation(
-                f"{name}: {group_sample_counts[name]} samples", 2
-            ) for name in group_sample_counts
-        ]
+        for name in group_sample_counts:
+            if group_sample_counts[name] == 1:
+                sample_count_string = f"{name}: {group_sample_counts[name]} sample"
+            else:
+                sample_count_string = f"{name}: {group_sample_counts[name]} samples"
+            group_lines = [
+                indentation.with_indentation(
+                    sample_count_string, 2
+                )
+            ]
         print("\n".join(group_lines))
         group_count = len(group_sample_counts)
         sample_count = sum(group_sample_counts.values())
+        if group_count == 1:
+            group_count_string = f"Total: {group_count} group, "
+        else:
+            group_count_string = f"Total: {group_count} groups, "
+        if sample_count == 1:
+            sample_count_string = f"{sample_count} sample\n"
+        else: 
+            sample_count_string = f"{sample_count} samples\n"
         indentation.print_indented(
-            f"Total: {group_count} groups, {sample_count} samples\n", 2
+            group_count_string + sample_count_string, 2
         )
 
     def _on_sampling_from_plugin_failure(self, plugin_name: str, reason: Exception) -> None:
@@ -156,8 +178,16 @@ class ConsoleView(View):
         )
 
     def _on_sampling_from_plugins_success(self, group_count: int, sample_count: int) -> None:
+        if group_count == 1:
+            group_count_string = f"Grand Total: {group_count} group, "
+        else:
+            group_count_string = f"Grand Total: {group_count} groups, "
+        if sample_count == 1:
+            sample_count_string = f"{sample_count} sample\n"
+        else:
+            sample_count_string = f"{sample_count} samples\n"
         indentation.print_indented(
-            f"Grand Total: {group_count} groups, {sample_count} samples\n", 1
+            group_count_string + sample_count_string, 1
         )
 
     def _on_sampling_from_plugins_failure(self) -> None:
