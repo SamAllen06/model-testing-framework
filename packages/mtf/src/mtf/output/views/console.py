@@ -220,7 +220,7 @@ class ConsoleView(View):
         self._prompt_to_continue_with_testing()
 
     def _prompt_to_continue_with_testing(self) -> None:
-        print("Would you like to continue? (Yes/No)")
+        print("Would you like to continue? (Yes/No or y/n)")
 
     def _on_began_sampling_from_group(
             self,
