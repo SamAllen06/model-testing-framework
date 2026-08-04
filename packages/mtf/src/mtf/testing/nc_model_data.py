@@ -48,7 +48,7 @@ class NetcdfModelData(ModelData):
         return self._dataset.variables[variable].dimensions
 
     def __enter__(self) -> None:
-        self._dataset = Dataset(self._backing_filepath, "r", "NETCDF4")
+        self._dataset = Dataset(self._backing_filepath, "r", format="NETCDF4")
 
     def __exit__(self, _exc_type, _exc_val, _exc_tb) -> None:
         self._dataset.close()
