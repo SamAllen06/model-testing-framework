@@ -28,7 +28,10 @@ def _generate_console_output(differences: DifferenceStore) -> str:
         lines.append(variable_header)
 
         count = len(diffs.indices)
-        lines.append(f"{count} differences from reference found.")
+        if count == 1:
+            lines.append(f"{count} difference from reference found.")
+        else:
+            lines.append(f"{count} differences from reference found.")
 
     if no_differences_flag:
         lines.append(
