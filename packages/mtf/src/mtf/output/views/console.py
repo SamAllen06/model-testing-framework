@@ -96,11 +96,8 @@ class ConsoleView(View):
         )
 
     def _on_sampling_plugins_load_success(self, count: int) -> None:
-        if count == 1:
-            string = f"\nLoaded {count} sampling plugin successfully.\n"
-        else:
-            string = f"\nLoaded {count} sampling plugins successfully.\n"
-        print(string)
+        print(f"\nLoaded {count} sampling plugin successfully.\n" if count == 1 
+              else f"\nLoaded {count} sampling plugins successfully.\n")
 
     def _on_sampling_plugins_load_failure(self) -> None:
         ansi.print_ansi_color(
@@ -113,11 +110,8 @@ class ConsoleView(View):
         print("Loading analysis plugins:")
 
     def _on_analysis_plugins_load_success(self, count: int) -> None:
-        if count == 1:
-            string = f"\nLoaded {count} analysis plugin successfully.\n"
-        else:
-            string = f"\nLoaded {count} analysis plugins successfully.\n"
-        print(string)
+        print(f"\nLoaded {count} analysis plugin successfully.\n" if count == 1 
+              else f"\nLoaded {count} analysis plugins successfully.\n")
 
 
     def _on_analysis_plugins_load_failure(self) -> None:
@@ -143,16 +137,14 @@ class ConsoleView(View):
             indentation.with_indentation(f"[{plugin_name}]:", 1),
             ansi.AnsiColor.BRIGHT_GREEN
         )
-        for name in group_sample_counts:
-            if group_sample_counts[name] == 1:
-                sample_count_string = f"{name}: {group_sample_counts[name]} sample"
-            else:
-                sample_count_string = f"{name}: {group_sample_counts[name]} samples"
-            group_lines = [
-                indentation.with_indentation(
-                    sample_count_string, 2
-                )
-            ]
+        group_lines = [
+            indentation.with_indentation(
+                f"{name}: {group_sample_counts[name]} sample" 
+                if group_sample_counts[name] == 1 
+                else f"{name}: {group_sample_counts[name]} samples",
+                2
+            ) for name in group_sample_counts
+        ]
         print("\n".join(group_lines))
         group_count = len(group_sample_counts)
         sample_count = sum(group_sample_counts.values())
