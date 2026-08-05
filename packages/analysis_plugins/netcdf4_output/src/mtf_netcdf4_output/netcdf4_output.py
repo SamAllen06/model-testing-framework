@@ -5,6 +5,7 @@ from pathlib import Path
 import tempfile
 
 from netCDF4 import Dataset
+from netCDF4 import default_fillvals
 import numpy as np
 import numpy.ma as npma
 
@@ -15,11 +16,16 @@ from mtf.sampling import Sample, SampleGroup
 from mtf.testing import ModelData
 from mtf.util import Table
 
+import pdb
+
 _CONFIG_PATH = root.get_config_path(
     root.ConfigPath.ANALYSIS_PLUGINS
 ) / "netcdf4_output.ini"
 _CONFIG = ConfigParser()
 _CONFIG.read(_CONFIG_PATH)
+
+
+# TODO remove all mentions of pdb
 
 
 class NetCDF4Output(SampleGroupAnalyzer):
@@ -29,6 +35,7 @@ class NetCDF4Output(SampleGroupAnalyzer):
         reference_data: ModelData,
         sample_data: list[ModelData],
     ) -> tuple[str, FileSystemTree]:
+        
         temp_data_file = tempfile.NamedTemporaryFile(suffix=".nc", delete=False)
         temp_data_file.close()
 
@@ -53,7 +60,6 @@ class NetCDF4Output(SampleGroupAnalyzer):
         sample_count = len(sample_group)
 
         dataset.createDimension("sample_index", sample_count)
-       
         for input_name in input_names:
             # Skip constants with non-scalar values for now.
             if sample_group[0][input_name].shape != ():
@@ -62,10 +68,12 @@ class NetCDF4Output(SampleGroupAnalyzer):
             input_var = dataset.createVariable(
                 input_name,
                 "f8",
-                ("sample_index",),
-                compression="zlib",
-                shuffle=False,
-                complevel=1,
+                ("sample_index",)
+                # compression="zlib",
+                # #all the compressors except 'zlib and 'szip' use the HDF5 plugin architecture
+                # shuffle=False,
+                # #if `True`, the HDF5 shuffle filter is applied to improve zlib compression. Default `True`. Ignored unless `compression = 'zlib'`.
+                # complevel=1,
             )
             input_var[:] = [sample[input_name] for sample in sample_group]
 
@@ -80,17 +88,24 @@ class NetCDF4Output(SampleGroupAnalyzer):
 
                     dataset.createDimension(dim_name, dim_length)
 
+                var_kwargs = dict(compression="zlib", shuffle=True, complevel=3) if dimensions else {}
                 dataset.createVariable(
                     output_name,
                     data.dtype,
                     ("sample_index",) + dimensions,
-                    compression="zlib",
-                    shuffle=True,
-                    complevel=3,
-                )
-
+                    **var_kwargs
+                    # compression="zlib",
+                    # shuffle=True,
+                    # complevel=3,
+                )    
         for sample_index, single_sample_data in enumerate(sample_data):
             with single_sample_data:
                 for output_name, output_data in single_sample_data.items():
                     output_var = dataset.variables[output_name]
+                    # if isinstance(output_data, npma.MaskedArray):
+                    #     fill_value = getattr(
+                    #         output_var, "_FillValue",
+                    #         default_fillvals[output_var.dtype.str[1:]],
+                    #     )
+                    #     output_data = output_data.filled(fill_value)
                     output_var[sample_index] = output_data
