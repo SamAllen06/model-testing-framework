@@ -21,4 +21,4 @@ It is worth noting that, while the core program does not require any additional 
 packages, to run some of the plugins, you may need the packages in
 `plugin_requirements.txt`.
 
-To enable and disable certain plugins, see [whitelist](docs/config/plugin_whitelist).
+To enable and disable certain plugins, see [whitelist](docs/config/plugin_whitelist.md).
