@@ -159,7 +159,7 @@ cython_debug/
 testing_output/
 
 # Plugin whitelists
-*/plugin_whitelist.json
+plugin_whitelist.json
 
 # Mac stuff
-*/.DS_Store
+.DS_Store
