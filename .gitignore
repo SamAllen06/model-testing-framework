@@ -159,9 +159,7 @@ cython_debug/
 testing_output/
 
 # Plugin whitelists
-whitelist
+*/plugin_whitelist.json
 
 # Mac stuff
 */.DS_Store
-packages/mtf/.DS_Store
-packages/mtf/src/.DS_Store
