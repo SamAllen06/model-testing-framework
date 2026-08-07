@@ -15,20 +15,20 @@ class ChangeAnalyzer(SampleGroupAnalyzer):
         reference_data: ModelData,
         sample_data: list[ModelData],
     ) -> tuple[str, FileSystemTree]:
-        used_inputs = self._get_used_inputs(sample_group)
+        used_constants = self._get_used_constants(sample_group)
         changed_outputs = self._get_changed_outputs(reference_data, sample_data)
 
-        return output.make_output(used_inputs, changed_outputs)
+        return output.make_output(used_constants, changed_outputs)
 
 
-    def _get_used_inputs(self, sample_group: SampleGroup) -> set[str]:
-        inputs = set()
+    def _get_used_constants(self, sample_group: SampleGroup) -> set[str]:
+        constants = set()
 
         for sample in sample_group:
-            for input in sample:
-                inputs.add(input)
+            for constant in sample:
+                constants.add(constant)
 
-        return inputs
+        return constants
 
     def _get_changed_outputs(
         self,
