@@ -3,7 +3,7 @@ APP/src/sampling_plugins/csv_index_sampling/
 
 ## Purpose
 The CSV Index Sampling plugin converts csv files containing indices (such as
-those produced by ACTS) into [SampleGroup(s).](../../sampling/sample_group.md)
+those produced by ACTS) into [SampleGroup(s)](../../sampling/sample_group.md).
 Each file contains a header of parameter names, and rows of indices under them.
 These indices are used to linearly interpolate each parameter through a range
 specified in another file.

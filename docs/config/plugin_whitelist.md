@@ -29,4 +29,4 @@ And the plugin whitelist contents:
 ```
 
 Only sampling plugin 2 and analysis plugins 1 and 3 will be loaded by
-[PluginLoader.](../plugin_loading/plugin_loader.md)
+[PluginLoader](../src/plugin_loading/plugin_loader.md).

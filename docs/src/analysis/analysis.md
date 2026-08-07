@@ -10,4 +10,4 @@ or the group of samples as a whole ([SampleGroupAnalyzer](sample_group_analyzer.
 
 ## Output
 Each analysis plugin is responsible for its own output. Plugins should return
-console output as well as file output, in the form of a [FileSystemTree.](../output/file_utils/file_system_tree.md)
+console output as well as file output, in the form of a [FileSystemTree](../output/file_utils/file_system_tree.md).

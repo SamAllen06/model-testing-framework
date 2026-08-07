@@ -16,7 +16,7 @@ the display name "My Sampling Plugin".
 ## sampler_class Attribute
 Each plugin must have a "sampler_class" attribute containing a reference to
 a [Sampler](../sampling/sampler.md) subclass in the plugin. This class can
-return one or more [SampleGroup(s),](../sampling/sample_group.md) which is how
+return one or more [SampleGroup(s)](../sampling/sample_group.md), which is how
 the plugin is able to generate samples.
 
 ## Example

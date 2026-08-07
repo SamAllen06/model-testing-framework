@@ -7,14 +7,14 @@ Produces file output for the testing program.
 ## Functionality
 This view produces three different forms of file output: samples, errors, and
 analysis. The location of these three types can be configured using 
-[its config file.](../../../config/output/files.md)
+[its config file](../../../config/output/files.md).
 
 ### Samples Output
 Sample output stores the values of the input parameters for all samples in each
-[SampleGroup.](../../sampling/sample_group.md)
+[SampleGroup](../../sampling/sample_group.md).
 
-Each csv is named after the [SampleGroup](../../sampling/sample_group.md) that
-generated the samples it stores. Example structure for the samples directory:
+Each csv is named after the SampleGroup that generated the samples it stores. Example
+structure for the samples directory:
 
 ```
 samples/
@@ -37,7 +37,7 @@ var1,var2,var3
 Error output records what samples caused the binary to crash.
 
 Similarly to the samples output, each csv in this directory is named after the
-[SampleGroup](../../sampling/sample_group.md) that contained one or more samples
+SampleGroup that contained one or more samples
 resulting in a crash. (A crash is defined as any time the binary returns an
 exit code other than 0.) If no samples in a group caused the binary to crash,
 that group will not have a file in this directory. (By extension, if no samples
@@ -67,14 +67,14 @@ Analysis output records the output of analysis plugins. It is split into two
 directories: "group" and "sample". Output from plugins extending
 [PerSampleAnalyzer](../../analysis/per_sample_analyzer.md) will go inside the
 "sample" directory, and output from plugins extending
-[SampleGroupAnalyzer](../../analysis/sample_group_analyzer.md) will go inside
+SampleGroupAnalyzer will go inside
 the "group" directory.
 
 Inside each directory, each [SampleGroup](../../sampling/sample_group.md) will
 have a directory. In the "group" directory, each plugin's output will be stored
 under that plugin's name. In the "sample" directory, each plugin's output is
 stored in a directory named after that plugin, under the sample's index inside
-the [SampleGroup.](../../sampling/sample_group.md)
+the SampleGroup.
 
 Example directory structure (each plugin's output has a .txt extension for
 visualization purposes - plugin output isn't limited to a single file or text

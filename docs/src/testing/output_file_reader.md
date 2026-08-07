@@ -31,11 +31,10 @@ sample's test data to the current group data.
 Group test data is stored in a [Table](../util/table.md) using a dictionary as
 its mapping and a [TransparentLayerList](../util/transparent_layer_list.md) as
 its sequence. The base layer is always the reference data, meaning the
-[TransparentLayerList(s)](../util/transparent_layer_list.md) only needs to
-store test data in terms of how it differs from the reference data. (See the
-documentation on [TransparentLayerList](../util/transparent_layer_list.md) for 
-more details.)
+TransparentLayerList(s) only needs to store test data in terms of how it differs from
+the reference data. (See the documentation on [TransparentLayerList](../util/transparent_layer_list.md)
+for more details.)
 
 Each sample's test data is added to the group data when read_sample_data is 
 called. When read_group_data is called, it will return this table, then reset
-the group data in preparation for the next [SampleGroup.](../sampling/sample_group.md)
+the group data in preparation for the next [SampleGroup](../sampling/sample_group.md).

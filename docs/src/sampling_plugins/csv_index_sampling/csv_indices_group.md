@@ -3,7 +3,7 @@ APP/src/sampling_plugins/csv_index_sampling/csv_indices_group.py
 
 ## Purpose
 CsvIndicesGroup is the CSV Index Sampling plugin's implementation of 
-[SampleGroup.](../../sampling/sample_group.md) It reads in a csv file
+[SampleGroup](../../sampling/sample_group.md). It reads in a csv file
 containing indices that are used to linearly interpolate through ranges for
 each of the parameters. See [CSV Index Sampling](csv_index_sampling.md) for an
 example.
