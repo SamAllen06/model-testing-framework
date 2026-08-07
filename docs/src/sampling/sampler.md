@@ -7,4 +7,4 @@ a dictionary mapping each sample group's name to the [SampleGroup](sample_group.
 object it is represented by.
 
 Each sampling plugin must have exactly one subclass of Sampler, but that object
-can return multiple [SampleGroup(s).](sample_group.md)
+can return multiple SampleGroup(s).

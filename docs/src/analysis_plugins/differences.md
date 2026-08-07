@@ -1,4 +1,5 @@
-# Differences Plugin (APP/src/analysis_plugins/differences/)
+# Differences Plugin 
+APP/src/analysis_plugins/differences/
 
 The Differences analysis plugin uses [PerSampleAnalyzer](../analysis/per_sample_analyzer.md)
 and is designed to find and identify any differences between the reference output

@@ -38,5 +38,5 @@ Box Order:
 ```
 
 This data is then given to [OrderFactory](order_factory.md) to create an Order.
-The resulting [Order](order.md) is stored in a dictionary, with the filename
+The resulting Order is stored in a dictionary, with the filename
 (minus the .json extension) as its key.

@@ -59,16 +59,16 @@ here. This includes plugin code.
 (APP/config/sampling_plugins/)
 
 The sampling plugin config directory contains all configuration files used by
-[sampling plugins.](sampling_plugins/how_to_create_a_sampling_plugin.md)
+[sampling plugins](sampling_plugins/how_to_create_a_sampling_plugin.md).
 
 ### ANALYSIS_PLUGIN_CONFIG_DIRECTORY
 (APP/config/analysis_plugins/)
 
 The analysis plugin config directory, similarly to its sampling equivalent,
-contains all configuration files used by [analysis plugins.](analysis_plugins/how_to_create_an_analysis_plugin.md)
+contains all configuration files used by [analysis plugins](analysis_plugins/how_to_create_an_analysis_plugin.md).
 
 ### OUTPUT_CONFIG_DIRECTORY
 (APP/config/output/)
 
 The output config directory contains all configuration files used by the
-[views.](output/views/views.md)
+[views](output/views/views.md).

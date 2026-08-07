@@ -12,5 +12,3 @@ On instantiation, the NetCDFSampleGroup will read its NetCDF file and create a s
 Sample from the values of each variable at a particular indice along the cases
 dimension. It repeats this for every indice along the cases dimension until it has a
 full SampleGroup. 
-
-## NetCDF Case File Header Example

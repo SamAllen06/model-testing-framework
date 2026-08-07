@@ -5,7 +5,7 @@ APP/config/sampling_plugins/csv_index_sampling.ini
 Configures the [CSV Index Sampling plugin.](../../src/sampling_plugins/csv_index_sampling/csv_index_sampling.md)
 
 ## Fields
-All paths are relative to [APP_ROOT.](../../src/root.md)
+All paths are relative to [APP_ROOT](../../src/root.md).
 
 | Field Name                | Type | Description                                                                     |
 |---------------------------|:----:|---------------------------------------------------------------------------------|

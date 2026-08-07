@@ -12,9 +12,7 @@ into one or the other. The table will maintain the same set of data even after
 these methods are called.
 
 ## Functionality
-A Table can store its dataset using an arbitrary
-[MutableMapping](https://docs.python.org/3.10/library/collections.abc.html#collections.abc.MutableMapping)
-and [MutableSequence,](https://docs.python.org/3.10/library/collections.abc.html#collections.abc.MutableSequence)
+A Table can store its dataset using an arbitrary MutableMapping and MutableSequence,
 which are passed through the constructor.
 The methods as_mapping and as_sequence create a TableMapping and TableSequence 
 object respectively. These objects share their data with the original Table
