@@ -26,26 +26,26 @@ The resulting NetCDF4 file will have the following structure, where x is
 the number of Samples in the Sample Group, k is the number of dimensions used, n is the
 number of constants, m is the number of outputs, and j, l, and p are positive integers:
 
-netcdf {
-dimensions:
-    sample_index = x ;
-    dimension_1 = j ;
-    dimension_2 = l ;
-    $\vdots$
-    dimension_k = p ;
-variables:
-    type constant_1(sample_index) ;
-        constant_1:variable_type = "constant" ;
-    type constant_2(sample_index) ;
-        constant_2:variable_type = "constant" ;
-    $\vdots$
-    type constant_n(sample_index) ;
-        constant_n:variable_type = "constant" ;
-    type output_1 (sample_index, dimension_1, dimension_2, ... dimension_k) ;
-        output_1:variable_type = "output" ;
-    type output_2 (sample_index, dimension_1, dimension_2, ... dimension_k) ;
-        output_2:variable_type = "output" ;
-    $\vdots$
-    type output_m(sample_index, dimension_1, dimension_2, ..., dimension_k) ;
-        output_m:variable_type = "output" ;
+netcdf {\
+dimensions:\
+&emsp; sample_index = x ;\
+&emsp; dimension_1 = j ;\
+&emsp; dimension_2 = l ;\
+&emsp; $\vdots$\
+&emsp; dimension_k = p ;\
+variables:\
+&emsp; type constant_1(sample_index) ;\
+&emsp;&emsp; constant_1:variable_type = "constant" ;\
+&emsp; type constant_2(sample_index) ;\
+&emsp;&emsp; constant_2:variable_type = "constant" ;\
+&emsp; $\vdots$\
+&emsp; type constant_n(sample_index) ;\
+&emsp;&emsp; constant_n:variable_type = "constant" ;\
+&emsp; type output_1 (sample_index, dimension_1, dimension_2, ... dimension_k) ;\
+&emsp;&emsp; output_1:variable_type = "output" ;\
+&emsp; type output_2 (sample_index, dimension_1, dimension_2, ... dimension_k) ;\
+&emsp;&emsp; output_2:variable_type = "output" ;\
+&emsp; $\vdots$\
+&emsp; type output_m(sample_index, dimension_1, dimension_2, ..., dimension_k) ;\
+&emsp;&emsp; output_m:variable_type = "output" ;\
 }

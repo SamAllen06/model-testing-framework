@@ -10,14 +10,14 @@ needed for the model constants for each individual Sample.
 
 ## Functionality
 Reads NetCDF case files in the specified directory. NetCDF case files use the following
-format, where x is some positive integer and n is the number of constants used:
+format, where x is the number of cases and n is the number of constants used:
 
-netcdf {
-dimensions:
-    cases = UNLIMITED ; // (x currently)
-variables:
-    double constant_1(cases) ;
-    double constant_2(cases) ;
-    $\vdots$
-    double constant_n(cases) ;
+netcdf {\
+dimensions:\
+&emsp; cases = UNLIMITED ; // (x currently)\
+variables:\
+&emsp; double constant_1(cases) ;\
+&emsp; double constant_2(cases) ;\
+&emsp; $\vdots$\
+&emsp; double constant_n(cases) ;\
 }
