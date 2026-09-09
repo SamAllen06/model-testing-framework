@@ -15,8 +15,8 @@ def _make_console_output(constants: set[str], outputs: set[str]) -> str:
     lines = []
 
     lines.append(
-        f"Changes to {len(outputs)} outputs observed resulting from changes to "
-        f"{len(constants)} constants.\n"
+        f"Changes to {len(outputs)} outputs observed resulting from changes to a subset "
+        f"of the {len(constants)} constants.\n"
     )
 
     lines.append("Constants:")
